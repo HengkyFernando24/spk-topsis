@@ -97,9 +97,86 @@ class TopsisController extends Controller
     }
 
     // Fungsi tambahan buat update kriteria dari Web
-   public function updateKriteria(Request $request, $id) {
-    $kriteria = \App\Models\Kriteria::find($id);
-    $kriteria->update($request->all());
-    return response()->json(['message' => 'Success']);
-}
+    public function updateKriteria(Request $request, $id) {
+        $kriteria = \App\Models\Kriteria::find($id);
+        if (!$kriteria) return response()->json(['message' => 'Not Found'], 404);
+        $kriteria->update($request->all());
+        return response()->json(['message' => 'Success']);
+    }
+
+    public function getKriteria() {
+        return response()->json(Kriteria::all());
+    }
+
+    public function deleteKriteria($id) {
+        $kriteria = Kriteria::find($id);
+        if ($kriteria) {
+            $kriteria->delete();
+            return response()->json(['message' => 'Deleted']);
+        }
+        return response()->json(['message' => 'Not Found'], 404);
+    }
+
+    public function hitungTopsis() {
+        // Logika hitung topsis sama dengan index tapi return JSON
+        $dataKriteria = Kriteria::all();
+        $bobot = $dataKriteria->pluck('bobot', 'kode')->toArray();
+        $tipe = $dataKriteria->pluck('tipe', 'kode')->toArray();
+        $kriteriaKeys = $dataKriteria->pluck('kode')->toArray();
+
+        $students = Mahasiswa::all()->toArray();
+
+        if (empty($students) || empty($bobot)) {
+            return response()->json([]);
+        }
+
+        $pembagi = [];
+        foreach ($kriteriaKeys as $c) {
+            $sumSq = 0;
+            $kodeKriteria = strtolower($c);
+            foreach ($students as $s) {
+                $sumSq += pow($s[$kodeKriteria], 2);
+            }
+            $pembagi[$c] = sqrt($sumSq) ?: 1;
+        }
+
+        $matriksTerbobot = [];
+        foreach ($students as $k => $s) {
+            foreach ($kriteriaKeys as $c) {
+                $kodeKriteria = strtolower($c);
+                $nilaiNormalisasi = ($s[$kodeKriteria] / $pembagi[$c]);
+                $matriksTerbobot[$k][$c] = $nilaiNormalisasi * $bobot[$c];
+            }
+        }
+
+        $aPlus = []; $aMinus = [];
+        foreach ($kriteriaKeys as $c) {
+            $kolomNilai = array_column($matriksTerbobot, $c);
+            if ($tipe[$c] == 'benefit') {
+                $aPlus[$c] = max($kolomNilai);
+                $aMinus[$c] = min($kolomNilai);
+            } else {
+                $aPlus[$c] = min($kolomNilai);
+                $aMinus[$c] = max($kolomNilai);
+            }
+        }
+
+        foreach ($students as $k => $s) {
+            $dPlus = 0; $dMinus = 0;
+            foreach ($kriteriaKeys as $c) {
+                $dPlus += pow($matriksTerbobot[$k][$c] - $aPlus[$c], 2);
+                $dMinus += pow($matriksTerbobot[$k][$c] - $aMinus[$c], 2);
+            }
+            $dPlus = sqrt($dPlus);
+            $dMinus = sqrt($dMinus);
+            $v = ($dPlus + $dMinus) == 0 ? 0 : ($dMinus / ($dPlus + $dMinus));
+            $students[$k]['v'] = $v;
+        }
+
+        usort($students, function($a, $b) {
+            return $b['v'] <=> $a['v'];
+        });
+
+        return response()->json($students);
+    }
 }

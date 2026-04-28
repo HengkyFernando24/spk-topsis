@@ -58,7 +58,7 @@
                                     <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-4">
                                         <span class="material-symbols-outlined !text-4xl text-slate-200">person_off</span>
                                     </div>
-                                    <p class="text-slate-400 font-bold uppercase tracking-[0.2em] text-xs">Belum ada data siswa, blay!</p>
+                                    <p class="text-slate-400 font-bold uppercase tracking-[0.2em] text-xs">Belum ada data siswa.</p>
                                     <p class="text-slate-300 text-[10px] mt-2">Klik tombol "Tambah Siswa" untuk mengisi secara manual.</p>
                                 </div>
                             </td>
@@ -74,10 +74,10 @@
 import { ref, computed } from 'vue';
 
 const searchQuery = ref('');
-// LIST KOSONG: Biar lo bisa isi sendiri blay
+// Daftar Siswa: Disimpan dalam state lokal untuk komponen ini
 const students = ref([]);
 
-// Fungsi buat nambah data manual (pake prompt biar simpel)
+// Fungsi untuk menambah data siswa secara manual
 const tambahSiswaManual = () => {
     const nama = prompt("Masukkan Nama Siswa:");
     if (!nama) return;
@@ -92,7 +92,7 @@ const tambahSiswaManual = () => {
 };
 
 const hapusSiswa = (index) => {
-    if(confirm('Yakin mau hapus data ini, blay?')) {
+    if(confirm('Apakah Anda yakin ingin menghapus data siswa ini?')) {
         students.value.splice(index, 1);
     }
 };

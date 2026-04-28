@@ -134,7 +134,7 @@ import DataSiswa from '../Components/DataSiswa.vue';
 
 const activeTab = ref('dashboard');
 
-// --- DATABASE LOKAL (PUSAT DATA) ---
+// --- PUSAT DATA LOKAL ---
 const students = ref([]); 
 const criteria = ref([]);
 
@@ -146,16 +146,16 @@ const formattedTitle = computed(() => {
 });
 
 // --- DIAGRAM BATANG OTOMATIS ---
-// Mengambil data langsung dari list students yang lo input
+// Mengambil data langsung dari daftar mahasiswa yang diinput
 const chartData = computed(() => {
     if (students.value.length === 0) {
-        // Data default kalau masih kosong biar grafik gak jelek
+        // Data default jika masih kosong
         return [{ name: 'N/A', value: 0 }];
     }
-    // Menampilkan skor V mahasiswa yang sudah diinput (limit 7 orang di grafik)
+    // Menampilkan skor V mahasiswa yang sudah diinput (maksimal 7 orang di grafik)
     return students.value.slice(0, 7).map(s => ({
-        name: s.nama.split(' ')[0], // Ambil nama depan aja biar gak kepanjangan
-        value: parseFloat(s.v) || 0.1 // Kalau belum ada nilai V, kasih bar kecil
+        name: s.nama.split(' ')[0], // Ambil nama depan agar tidak terlalu panjang
+        value: parseFloat(s.v) || 0.1 // Berikan nilai default kecil jika skor V belum tersedia
     }));
 });
 
