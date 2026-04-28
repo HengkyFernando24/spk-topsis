@@ -3,152 +3,59 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Mahasiswa;
+use App\Models\Kriteria;
 
 class TopsisController extends Controller
 {
     public function index()
     {
-        // 1. KONFIGURASI BOBOT & TIPE KRITERIA (Benefit/Cost)
-        $bobot = [
-            'c1' => 0.30, // IPK (Benefit)
-            'c2' => 0.20, // Kehadiran (Benefit)
-            'c3' => 0.15, // Prestasi (Benefit)
-            'c4' => 0.10, // Terlambat (Cost)
-            'c5' => 0.25  // Tugas (Benefit)
-        ];
-
-        $tipe = [
-            'c1' => 'benefit',
-            'c2' => 'benefit',
-            'c3' => 'benefit',
-            'c4' => 'cost',
-            'c5' => 'benefit'
-        ];
+        // 1. AMBIL DATA KRITERIA DARI DATABASE
+        $dataKriteria = Kriteria::all();
         
+        // Kita petakan biar gampang dipake rumusnya
+        $bobot = $dataKriteria->pluck('bobot', 'kode')->toArray(); // ['C1' => 0.3, 'C2' => 0.2, ...]
+        $tipe = $dataKriteria->pluck('tipe', 'kode')->toArray();   // ['C1' => 'benefit', ...]
+        $kriteriaKeys = $dataKriteria->pluck('kode')->toArray();   // ['C1', 'C2', ...]
 
-        // 2. DATABASE MAHASISWA (90 DATA DARI CSV)
-        $students = [
-            ['id' => 1, 'nama' => 'Vivien Monica', 'nim' => '-', 'c1' => 3.45, 'c2' => 40, 'c3' => 0, 'c4' => 5, 'c5' => 63],
-            ['id' => 2, 'nama' => 'Siti Nur Azizah', 'nim' => '-', 'c1' => 3.84, 'c2' => 80, 'c3' => 0, 'c4' => 2, 'c5' => 77],
-            ['id' => 3, 'nama' => 'Memey Susanti', 'nim' => '-', 'c1' => 3.80, 'c2' => 80, 'c3' => 0, 'c4' => 2, 'c5' => 73],
-            ['id' => 4, 'nama' => 'Rindi Apriyani', 'nim' => '-', 'c1' => 3.74, 'c2' => 50, 'c3' => 0, 'c4' => 2, 'c5' => 74],
-            ['id' => 5, 'nama' => 'Vika Emilia', 'nim' => '-', 'c1' => 3.43, 'c2' => 60, 'c3' => 0, 'c4' => 4, 'c5' => 87],
-            ['id' => 6, 'nama' => 'Laura Aril Ramadhita', 'nim' => '-', 'c1' => 3.68, 'c2' => 80, 'c3' => 0, 'c4' => 2, 'c5' => 78],
-            ['id' => 7, 'nama' => 'Taufiqurohman', 'nim' => '-', 'c1' => 2.89, 'c2' => 10, 'c3' => 0, 'c4' => 10, 'c5' => 10],
-            ['id' => 8, 'nama' => 'Vemas Angger Permana', 'nim' => '-', 'c1' => 3.50, 'c2' => 30, 'c3' => 0, 'c4' => 9, 'c5' => 48],
-            ['id' => 9, 'nama' => 'Fikri Kurniawan', 'nim' => '-', 'c1' => 3.47, 'c2' => 30, 'c3' => 0, 'c4' => 9, 'c5' => 45],
-            ['id' => 10, 'nama' => 'Febri Hadi Noto', 'nim' => '-', 'c1' => 3.48, 'c2' => 60, 'c3' => 0, 'c4' => 3, 'c5' => 87],
-            ['id' => 11, 'nama' => 'Nelgi Pinando', 'nim' => '-', 'c1' => 3.63, 'c2' => 80, 'c3' => 0, 'c4' => 5, 'c5' => 85],
-            ['id' => 12, 'nama' => 'Robin Setiawan', 'nim' => '-', 'c1' => 3.75, 'c2' => 80, 'c3' => 0, 'c4' => 3, 'c5' => 66],
-            ['id' => 13, 'nama' => 'Okta Dela Puspita', 'nim' => '-', 'c1' => 3.70, 'c2' => 80, 'c3' => 0, 'c4' => 2, 'c5' => 60],
-            ['id' => 14, 'nama' => 'Ari Irawan', 'nim' => '-', 'c1' => 3.84, 'c2' => 100, 'c3' => 0, 'c4' => 3, 'c5' => 88],
-            ['id' => 15, 'nama' => 'Riha Nikmatul Hasanah', 'nim' => '-', 'c1' => 3.76, 'c2' => 90, 'c3' => 0, 'c4' => 3, 'c5' => 85],
-            ['id' => 16, 'nama' => 'Ariel Mutia Salsabila', 'nim' => '-', 'c1' => 3.69, 'c2' => 85, 'c3' => 0, 'c4' => 3, 'c5' => 87],
-            ['id' => 17, 'nama' => 'Lilis Wulandari', 'nim' => '-', 'c1' => 3.83, 'c2' => 80, 'c3' => 0, 'c4' => 2, 'c5' => 86],
-            ['id' => 18, 'nama' => 'Indra Susena', 'nim' => '-', 'c1' => 3.40, 'c2' => 10, 'c3' => 0, 'c4' => 10, 'c5' => 45],
-            ['id' => 19, 'nama' => 'Aisyah Lia Sari', 'nim' => '-', 'c1' => 3.49, 'c2' => 40, 'c3' => 0, 'c4' => 2, 'c5' => 35],
-            ['id' => 20, 'nama' => 'Meli Agustin', 'nim' => '-', 'c1' => 3.50, 'c2' => 20, 'c3' => 0, 'c4' => 7, 'c5' => 35],
-            ['id' => 21, 'nama' => 'Ahmad Maulana Ani Saputra', 'nim' => '-', 'c1' => 3.74, 'c2' => 10, 'c3' => 0, 'c4' => 2, 'c5' => 38],
-            ['id' => 22, 'nama' => 'Desma Dwi Sara', 'nim' => '-', 'c1' => 3.68, 'c2' => 50, 'c3' => 0, 'c4' => 2, 'c5' => 36],
-            ['id' => 23, 'nama' => 'Neddy Satria Tama', 'nim' => '-', 'c1' => 3.18, 'c2' => 40, 'c3' => 0, 'c4' => 2, 'c5' => 31],
-            ['id' => 24, 'nama' => 'Ayu Rahmawati', 'nim' => '-', 'c1' => 3.71, 'c2' => 100, 'c3' => 0, 'c4' => 2, 'c5' => 73],
-            ['id' => 25, 'nama' => 'Diyatun Maskon Dimas', 'nim' => '-', 'c1' => 3.66, 'c2' => 60, 'c3' => 0, 'c4' => 8, 'c5' => 48],
-            ['id' => 26, 'nama' => 'Nanda Eirlangga', 'nim' => '-', 'c1' => 3.58, 'c2' => 50, 'c3' => 0, 'c4' => 6, 'c5' => 58],
-            ['id' => 27, 'nama' => 'Maya Melisa', 'nim' => '-', 'c1' => 3.64, 'c2' => 10, 'c3' => 0, 'c4' => 4, 'c5' => 38],
-            ['id' => 28, 'nama' => 'Dimas Ajirul Anam', 'nim' => '-', 'c1' => 3.56, 'c2' => 50, 'c3' => 0, 'c4' => 2, 'c5' => 48],
-            ['id' => 29, 'nama' => 'Deni Alfian', 'nim' => '-', 'c1' => 3.39, 'c2' => 20, 'c3' => 0, 'c4' => 6, 'c5' => 44],
-            ['id' => 30, 'nama' => 'Ferdi Rifaldo', 'nim' => '-', 'c1' => 3.61, 'c2' => 60, 'c3' => 0, 'c4' => 5, 'c5' => 67],
-            ['id' => 31, 'nama' => 'Siska Mayang Sari', 'nim' => '-', 'c1' => 3.68, 'c2' => 80, 'c3' => 0, 'c4' => 5, 'c5' => 83],
-            ['id' => 32, 'nama' => 'Syafira Nuraini Fadila', 'nim' => '-', 'c1' => 3.23, 'c2' => 30, 'c3' => 0, 'c4' => 2, 'c5' => 76],
-            ['id' => 33, 'nama' => 'Noval Rahmadani', 'nim' => '-', 'c1' => 3.58, 'c2' => 70, 'c3' => 0, 'c4' => 3, 'c5' => 72],
-            ['id' => 34, 'nama' => 'M Irsyadillah Hafizd', 'nim' => '-', 'c1' => 3.62, 'c2' => 60, 'c3' => 0, 'c4' => 8, 'c5' => 77],
-            ['id' => 35, 'nama' => 'Akbar Daryl Talabani', 'nim' => '-', 'c1' => 3.29, 'c2' => 10, 'c3' => 0, 'c4' => 10, 'c5' => 25],
-            ['id' => 36, 'nama' => 'Ahmad Syukron Ma’mum', 'nim' => '-', 'c1' => 3.86, 'c2' => 90, 'c3' => 0, 'c4' => 2, 'c5' => 85],
-            ['id' => 37, 'nama' => 'Huda Mutaman', 'nim' => '-', 'c1' => 3.77, 'c2' => 90, 'c3' => 0, 'c4' => 2, 'c5' => 85],
-            ['id' => 38, 'nama' => 'Hengky Fernando', 'nim' => '-', 'c1' => 3.76, 'c2' => 100, 'c3' => 10, 'c4' => 0, 'c5' => 85],
-            ['id' => 39, 'nama' => 'Apriza Yuni Lestari', 'nim' => '-', 'c1' => 3.82, 'c2' => 90, 'c3' => 0, 'c4' => 4, 'c5' => 83],
-            ['id' => 40, 'nama' => 'Mariatul Ulfa', 'nim' => '-', 'c1' => 3.60, 'c2' => 50, 'c3' => 0, 'c4' => 3, 'c5' => 80],
-            ['id' => 41, 'nama' => 'Gunanda Dwi Tara', 'nim' => '-', 'c1' => 3.79, 'c2' => 100, 'c3' => 0, 'c4' => 0, 'c5' => 78],
-            ['id' => 42, 'nama' => 'Niken Hesti Damayanti', 'nim' => '-', 'c1' => 3.80, 'c2' => 60, 'c3' => 0, 'c4' => 2, 'c5' => 82],
-            ['id' => 43, 'nama' => 'Maulana Aziz', 'nim' => '-', 'c1' => 3.72, 'c2' => 90, 'c3' => 10, 'c4' => 3, 'c5' => 72],
-            ['id' => 44, 'nama' => 'Meilani Sapitri', 'nim' => '-', 'c1' => 3.78, 'c2' => 80, 'c3' => 0, 'c4' => 3, 'c5' => 78],
-            ['id' => 45, 'nama' => 'Reza Koswara', 'nim' => '-', 'c1' => 3.24, 'c2' => 50, 'c3' => 0, 'c4' => 3, 'c5' => 24],
-            ['id' => 46, 'nama' => 'Afifa Gita Ayu Cahyani', 'nim' => '-', 'c1' => 3.89, 'c2' => 100, 'c3' => 30, 'c4' => 0, 'c5' => 90],
-            ['id' => 47, 'nama' => 'Anggun Aulia Fitria', 'nim' => '-', 'c1' => 3.81, 'c2' => 80, 'c3' => 0, 'c4' => 2, 'c5' => 82],
-            ['id' => 48, 'nama' => 'Devi Damayanti', 'nim' => '-', 'c1' => 3.24, 'c2' => 30, 'c3' => 0, 'c4' => 9, 'c5' => 24],
-            ['id' => 49, 'nama' => 'Danarenanda', 'nim' => '-', 'c1' => 3.78, 'c2' => 90, 'c3' => 0, 'c4' => 2, 'c5' => 78],
-            ['id' => 50, 'nama' => 'Nur Ferdiansyah', 'nim' => '-', 'c1' => 3.87, 'c2' => 90, 'c3' => 0, 'c4' => 2, 'c5' => 87],
-            ['id' => 51, 'nama' => 'Arda Bagus Bimantara', 'nim' => '-', 'c1' => 3.05, 'c2' => 10, 'c3' => 0, 'c4' => 2, 'c5' => 15],
-            ['id' => 52, 'nama' => 'Julia Rokhmatur Rizqi', 'nim' => '-', 'c1' => 3.88, 'c2' => 100, 'c3' => 50, 'c4' => 0, 'c5' => 95],
-            ['id' => 53, 'nama' => 'Anggy WS', 'nim' => '-', 'c1' => 3.88, 'c2' => 100, 'c3' => 40, 'c4' => 2, 'c5' => 90],
-            ['id' => 54, 'nama' => 'Zainudin Khamid', 'nim' => '-', 'c1' => 3.54, 'c2' => 50, 'c3' => 0, 'c4' => 6, 'c5' => 54],
-            ['id' => 55, 'nama' => 'Dita Ramadani', 'nim' => '-', 'c1' => 3.69, 'c2' => 70, 'c3' => 0, 'c4' => 3, 'c5' => 69],
-            ['id' => 56, 'nama' => 'Tabri Agustian', 'nim' => '-', 'c1' => 3.54, 'c2' => 60, 'c3' => 0, 'c4' => 7, 'c5' => 50],
-            ['id' => 57, 'nama' => 'Ira Rosita', 'nim' => '-', 'c1' => 3.73, 'c2' => 70, 'c3' => 0, 'c4' => 3, 'c5' => 73],
-            ['id' => 58, 'nama' => 'Ahmad Hafi Mu’afa', 'nim' => '-', 'c1' => 3.61, 'c2' => 30, 'c3' => 0, 'c4' => 5, 'c5' => 61],
-            ['id' => 59, 'nama' => 'Rangga Arya Junianto', 'nim' => '-', 'c1' => 3.41, 'c2' => 10, 'c3' => 0, 'c4' => 10, 'c5' => 41],
-            ['id' => 60, 'nama' => 'Putri Wiji Lestari', 'nim' => '-', 'c1' => 3.73, 'c2' => 60, 'c3' => 0, 'c4' => 2, 'c5' => 73],
-            ['id' => 61, 'nama' => 'M Abdul Aziz', 'nim' => '-', 'c1' => 3.67, 'c2' => 80, 'c3' => 0, 'c4' => 5, 'c5' => 67],
-            ['id' => 62, 'nama' => 'Razu Pratama', 'nim' => '-', 'c1' => 2.66, 'c2' => 10, 'c3' => 0, 'c4' => 10, 'c5' => 10],
-            ['id' => 63, 'nama' => 'Yoga Mukhlas Mubarak', 'nim' => '-', 'c1' => 3.75, 'c2' => 70, 'c3' => 0, 'c4' => 5, 'c5' => 75],
-            ['id' => 64, 'nama' => 'Abi Juliansyah', 'nim' => '-', 'c1' => 3.38, 'c2' => 50, 'c3' => 0, 'c4' => 8, 'c5' => 38],
-            ['id' => 65, 'nama' => 'Nur Rohim', 'nim' => '-', 'c1' => 3.43, 'c2' => 60, 'c3' => 0, 'c4' => 6, 'c5' => 43],
-            ['id' => 66, 'nama' => 'Nur Rohman', 'nim' => '-', 'c1' => 3.50, 'c2' => 40, 'c3' => 0, 'c4' => 7, 'c5' => 50],
-            ['id' => 67, 'nama' => 'Febry Arya Maulana', 'nim' => '-', 'c1' => 3.20, 'c2' => 30, 'c3' => 0, 'c4' => 4, 'c5' => 20],
-            ['id' => 68, 'nama' => 'Ani Sopiatur Rosidah', 'nim' => '-', 'c1' => 3.47, 'c2' => 40, 'c3' => 0, 'c4' => 7, 'c5' => 47],
-            ['id' => 69, 'nama' => 'Yulita Wahyuningsih', 'nim' => '-', 'c1' => 3.67, 'c2' => 70, 'c3' => 0, 'c4' => 6, 'c5' => 67],
-            ['id' => 70, 'nama' => 'M Afan Adi Saputra', 'nim' => '-', 'c1' => 3.80, 'c2' => 80, 'c3' => 0, 'c4' => 2, 'c5' => 80],
-            ['id' => 71, 'nama' => 'M Dimas Ulinuha', 'nim' => '-', 'c1' => 3.72, 'c2' => 80, 'c3' => 0, 'c4' => 2, 'c5' => 72],
-            ['id' => 72, 'nama' => 'Haris Al Mufaridun', 'nim' => '-', 'c1' => 3.56, 'c2' => 50, 'c3' => 0, 'c4' => 2, 'c5' => 56],
-            ['id' => 73, 'nama' => 'Indra Lesmana', 'nim' => '-', 'c1' => 3.57, 'c2' => 50, 'c3' => 0, 'c4' => 8, 'c5' => 68],
-            ['id' => 74, 'nama' => 'Wildan Arosyid', 'nim' => '-', 'c1' => 3.83, 'c2' => 80, 'c3' => 0, 'c4' => 2, 'c5' => 83],
-            ['id' => 75, 'nama' => 'Desi Rahmawati', 'nim' => '-', 'c1' => 3.64, 'c2' => 60, 'c3' => 0, 'c4' => 2, 'c5' => 64],
-            ['id' => 76, 'nama' => 'Monica Sutari', 'nim' => '-', 'c1' => 3.76, 'c2' => 70, 'c3' => 0, 'c4' => 2, 'c5' => 76],
-            ['id' => 77, 'nama' => 'Yusnandar', 'nim' => '-', 'c1' => 3.07, 'c2' => 20, 'c3' => 0, 'c4' => 10, 'c5' => 10],
-            ['id' => 78, 'nama' => 'M Ali Rifai’i', 'nim' => '-', 'c1' => 3.83, 'c2' => 90, 'c3' => 0, 'c4' => 2, 'c5' => 78],
-            ['id' => 79, 'nama' => 'Wily Kardo', 'nim' => '-', 'c1' => 3.03, 'c2' => 10, 'c3' => 0, 'c4' => 3, 'c5' => 10],
-            ['id' => 80, 'nama' => 'Ulfa Hidayat', 'nim' => '-', 'c1' => 3.67, 'c2' => 60, 'c3' => 0, 'c4' => 2, 'c5' => 67],
-            ['id' => 81, 'nama' => 'Siska Maurani', 'nim' => '-', 'c1' => 3.62, 'c2' => 60, 'c3' => 0, 'c4' => 2, 'c5' => 62],
-            ['id' => 82, 'nama' => 'Maryanti', 'nim' => '-', 'c1' => 3.72, 'c2' => 70, 'c3' => 0, 'c4' => 2, 'c5' => 72],
-            ['id' => 83, 'nama' => 'Lia Ferliana Puteri', 'nim' => '-', 'c1' => 3.82, 'c2' => 80, 'c3' => 0, 'c4' => 3, 'c5' => 77],
-            ['id' => 84, 'nama' => 'Jumari', 'nim' => '-', 'c1' => 3.81, 'c2' => 80, 'c3' => 0, 'c4' => 3, 'c5' => 75],
-            ['id' => 85, 'nama' => 'Evi Yulastri', 'nim' => '-', 'c1' => 3.15, 'c2' => 10, 'c3' => 0, 'c4' => 3, 'c5' => 15],
-            ['id' => 86, 'nama' => 'Anjar Yoga Rendiandyah', 'nim' => '-', 'c1' => 3.16, 'c2' => 10, 'c3' => 0, 'c4' => 10, 'c5' => 16],
-            ['id' => 87, 'nama' => 'Ani Rosalina', 'nim' => '-', 'c1' => 3.83, 'c2' => 80, 'c3' => 0, 'c4' => 4, 'c5' => 75],
-            ['id' => 88, 'nama' => 'Bahrul Ulum ZR', 'nim' => '-', 'c1' => 3.74, 'c2' => 70, 'c3' => 0, 'c4' => 4, 'c5' => 74],
-            ['id' => 89, 'nama' => 'Bagas Adi Nugraha', 'nim' => '-', 'c1' => 3.60, 'c2' => 60, 'c3' => 0, 'c4' => 3, 'c5' => 60],
-            ['id' => 90, 'nama' => 'Rosidatul Alfiyah', 'nim' => '-', 'c1' => 3.62, 'c2' => 60, 'c3' => 0, 'c4' => 5, 'c5' => 63],
-        ];
+        // 2. AMBIL DATA MAHASISWA DARI DATABASE
+        $students = Mahasiswa::all()->toArray();
+
+        // Cek dulu, kalau kosong jangan lanjut ngitung biar gak error
+        if (empty($students) || empty($bobot)) {
+            return view('topsis.index', [
+                'dataMahasiswa' => [],
+                'kriteria' => $dataKriteria
+            ]);
+        }
+
+        // --- ALGORITMA TOPSIS MULAI ---
 
         // TAHAP 1: MENGHITUNG PEMBAGI NORMALISASI
-        $pembagi = ['c1' => 0, 'c2' => 0, 'c3' => 0, 'c4' => 0, 'c5' => 0];
-        foreach ($students as $s) {
-            $pembagi['c1'] += pow($s['c1'], 2);
-            $pembagi['c2'] += pow($s['c2'], 2);
-            $pembagi['c3'] += pow($s['c3'], 2);
-            $pembagi['c4'] += pow($s['c4'], 2);
-            $pembagi['c5'] += pow($s['c5'], 2);
+        $pembagi = [];
+        foreach ($kriteriaKeys as $c) {
+            $sumSq = 0;
+            $kodeKriteria = strtolower($c); // Sesuaikan dengan kolom di DB (misal: c1)
+            foreach ($students as $s) {
+                $sumSq += pow($s[$kodeKriteria], 2);
+            }
+            $pembagi[$c] = sqrt($sumSq);
         }
-        $pembagi = array_map('sqrt', $pembagi);
 
-        // TAHAP 2: NORMALISASI MATRIKS & MENGKALIKAN DENGAN BOBOT
+        // TAHAP 2: NORMALISASI MATRIKS & KALIKAN BOBOT
         $matriksTerbobot = [];
         foreach ($students as $k => $s) {
-            $matriksTerbobot[$k] = [
-                'c1' => ($s['c1'] / $pembagi['c1']) * $bobot['c1'],
-                'c2' => ($s['c2'] / $pembagi['c2']) * $bobot['c2'],
-                'c3' => ($pembagi['c3'] == 0 ? 0 : ($s['c3'] / $pembagi['c3'])) * $bobot['c3'], // Cegah error kalau C3 kebetulan 0 semua
-                'c4' => ($s['c4'] / $pembagi['c4']) * $bobot['c4'],
-                'c5' => ($s['c5'] / $pembagi['c5']) * $bobot['c5'],
-            ];
+            foreach ($kriteriaKeys as $c) {
+                $kodeKriteria = strtolower($c);
+                $nilaiNormalisasi = ($pembagi[$c] == 0) ? 0 : ($s[$kodeKriteria] / $pembagi[$c]);
+                $matriksTerbobot[$k][$c] = $nilaiNormalisasi * $bobot[$c];
+            }
         }
 
-        // TAHAP 3: MENENTUKAN SOLUSI IDEAL POSITIF (A+) DAN NEGATIF (A-)
+        // TAHAP 3: SOLUSI IDEAL POSITIF (A+) & NEGATIF (A-)
         $aPlus = [];
         $aMinus = [];
-        $kriteria = ['c1', 'c2', 'c3', 'c4', 'c5'];
-
-        foreach ($kriteria as $c) {
+        foreach ($kriteriaKeys as $c) {
             $kolomNilai = array_column($matriksTerbobot, $c);
             
             if ($tipe[$c] == 'benefit') {
@@ -160,12 +67,12 @@ class TopsisController extends Controller
             }
         }
 
-        // TAHAP 4: MENGHITUNG JARAK EUCLIDEAN (D+ dan D-) & NILAI PREFERENSI (V)
+        // TAHAP 4: JARAK EUCLIDEAN & NILAI PREFERENSI (V)
         foreach ($students as $k => $s) {
             $dPlus = 0;
             $dMinus = 0;
 
-            foreach ($kriteria as $c) {
+            foreach ($kriteriaKeys as $c) {
                 $dPlus += pow($matriksTerbobot[$k][$c] - $aPlus[$c], 2);
                 $dMinus += pow($matriksTerbobot[$k][$c] - $aMinus[$c], 2);
             }
@@ -173,22 +80,26 @@ class TopsisController extends Controller
             $dPlus = sqrt($dPlus);
             $dMinus = sqrt($dMinus);
 
-            // Menghindari pembagian dengan 0
             $v = ($dPlus + $dMinus) == 0 ? 0 : ($dMinus / ($dPlus + $dMinus));
-            
-            // Simpan hasil V ke dalam array mahasiswa utama
             $students[$k]['v'] = $v;
         }
 
-        // TAHAP 5: PERANKINGAN (DIHAPUS / DIMATIKAN)
-        // Saya nonaktifkan bagian usort() agar data tetap berurutan seperti aslinya (ID 1, 2, 3...)
-        /*
+        // TAHAP 5: PERANKINGAN (Urutkan dari V tertinggi)
         usort($students, function($a, $b) {
             return $b['v'] <=> $a['v'];
         });
-        */
 
-        // TAHAP 6: KIRIM DATA KE HALAMAN DEPAN
-        return view('topsis.index', ['dataMahasiswa' => $students]);
+        // 3. KIRIM KE VIEW
+        return view('topsis.index', [
+            'dataMahasiswa' => $students,
+            'kriteria' => $dataKriteria
+        ]);
     }
+
+    // Fungsi tambahan buat update kriteria dari Web
+   public function updateKriteria(Request $request, $id) {
+    $kriteria = \App\Models\Kriteria::find($id);
+    $kriteria->update($request->all());
+    return response()->json(['message' => 'Success']);
+}
 }

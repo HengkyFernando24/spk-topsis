@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Mahasiswa extends Model
 {
-    // Tambahkan baris ini!
+    // Kalau nama tabel di DB adalah 'mahasiswa', paksa di sini:
     protected $table = 'mahasiswa'; 
 
     protected $fillable = ['nama', 'nim', 'c1', 'c2', 'c3', 'c4', 'c5'];
