@@ -10,7 +10,7 @@
                         <span class="material-symbols-outlined !text-3xl">analytics</span>
                     </div>
                     <div>
-                        <h1 class="text-xl font-black text-white tracking-tighter leading-none">Edu TOPSIS</h1>
+                        <h1 class="text-xl font-black text-white tracking-tighter leading-none">SPK TOPSIS</h1>
                         <p class="text-emerald-400 text-[9px] font-bold uppercase tracking-widest mt-1 opacity-80">Sistem Penunjang Keputusan</p>
                     </div>
                 </div>
@@ -24,7 +24,7 @@
                 </button>
             </nav>
             <div class="mt-auto px-4 border-t border-emerald-800/30 pt-8 relative z-10">
-                <button class="w-full text-left text-rose-400 hover:bg-rose-500/10 flex items-center px-5 py-3.5 transition-all rounded-2xl">
+                <button @click="showLogoutPopup = true" class="w-full text-left text-rose-400 hover:bg-rose-500/10 flex items-center px-5 py-3.5 transition-all rounded-2xl">
                     <span class="material-symbols-outlined mr-4 text-xl">logout</span>
                     <span class="text-sm font-bold">Keluar Sistem</span>
                 </button>
@@ -37,7 +37,7 @@
             <header class="h-24 bg-white/70 backdrop-blur-2xl border-b border-slate-200/50 flex items-center justify-between px-12 sticky top-0 z-40">
                 <div>
                     <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.4em] mb-1">Administrator</h2>
-                    <p class="text-2xl font-extrabold text-slate-800 tracking-tight capitalize">{{ formattedTitle }} Overview</p>
+                    <p class="text-2xl font-extrabold text-slate-800 tracking-tight capitalize">{{ formattedTitle }} </p>
                 </div>
                 <div class="flex items-center gap-6">
                     <div class="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-400 hover:text-emerald-600 transition-all cursor-pointer">
@@ -361,9 +361,36 @@
         </div>
     </div>
 
+<div v-if="showLogoutPopup" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300">
+            <div class="bg-white rounded-3xl p-8 max-w-sm w-full mx-4 shadow-2xl border border-slate-100 relative overflow-hidden">
+                <div class="absolute -right-10 -top-10 w-32 h-32 bg-rose-50 rounded-full blur-2xl pointer-events-none opacity-60"></div>
+                
+                <div class="relative z-10">
+                    <div class="w-16 h-16 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner border border-rose-100">
+                        <span class="material-symbols-outlined !text-4xl">logout</span>
+                    </div>
+                    <h3 class="text-xl font-black text-slate-800 text-center tracking-tight mb-2">Keluar Sistem?</h3>
+                    <p class="text-sm text-slate-500 text-center font-medium mb-8 leading-relaxed">
+                        Apakah Anda yakin ingin keluar dari SPK TOPSIS?
+                    </p>
+                    <div class="flex gap-4">
+                        <button @click="showLogoutPopup = false" class="flex-1 py-3.5 bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-slate-700 rounded-xl text-xs font-black tracking-widest uppercase transition-all">
+                            Batal
+                        </button>
+                        <button @click="prosesLogout" :disabled="isLoggingOut" class="flex-1 py-3.5 bg-rose-500 text-white hover:bg-rose-600 rounded-xl text-xs font-black tracking-widest uppercase transition-all shadow-lg hover:shadow-rose-200 flex justify-center items-center gap-2 disabled:opacity-50">
+                            <span v-if="isLoggingOut" class="material-symbols-outlined animate-spin !text-lg">progress_activity</span>
+                            <span v-else>Ya, Keluar</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
 </template>
 
 <script setup>
+import axios from 'axios'; // Pastikan axios udah di-import ya blay
 import { ref, computed, onMounted } from 'vue';
 import TopsisTable from '../Components/TopsisTable.vue';
 import KriteriaManager from '../Components/KriteriaManager.vue';
@@ -372,6 +399,20 @@ import Perhitungan from '../Components/Perhitungan.vue';
 import TambahSiswa from '../Components/TambahSiswa.vue';
 import StatsCard from '../Components/StatsCard.vue';
 import Laporan from '../Components/Laporan.vue';
+
+
+// STATE UNTUK POP-UP LOGOUT
+const showLogoutPopup = ref(false);
+const isLoggingOut = ref(false);
+
+// FUNGSI EKSEKUSI LOGOUT
+const prosesLogout = () => {
+    // 1. Fire and Forget: Tembak ke Laravel tapi gak usah ditungguin balesannya
+    axios.post('/logout'); 
+
+    // 2. Langsung ganti halaman secara paksa (replace biar gak bisa di-back)
+    window.location.replace('/login');
+};
 
 // ========== WARNA UNTUK SETIAP CARD KRITERIA ==========
 const getKriteriaCardClass = (index) => {
