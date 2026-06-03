@@ -1,240 +1,177 @@
 <template>
   <div class="p-4 md:p-8 max-w-7xl mx-auto font-['Inter'] antialiased text-gray-900">
-    <!-- Header Section dengan Animasi -->
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
       <div>
         <div class="flex items-center gap-3 mb-2">
-          <div class="w-1.5 h-8 bg-emerald-500 rounded-full animate-pulse"></div>
-          <h2 class="text-3xl font-black text-emerald-900 tracking-tight">Manajemen Kriteria</h2>
+          <div class="w-1.5 h-8 bg-emerald-500 rounded-full"></div>
+          <h2 class="text-2xl font-bold text-emerald-900">Manajemen Kriteria</h2>
         </div>
-        <p class="text-gray-500 text-sm max-w-2xl leading-relaxed">
-          Kelola parameter penilaian untuk sistem pendukung keputusan menggunakan algoritma <span class="font-bold text-emerald-700">TOPSIS</span>.
+        <p class="text-gray-500 text-sm">
+          Kelola parameter penilaian untuk sistem pendukung keputusan menggunakan metode TOPSIS.
         </p>
       </div>
-      <button @click="showForm = true"
-              class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-2xl flex items-center gap-2 transition-all duration-300 shadow-lg hover:shadow-emerald-200 active:scale-95 group">
-        <span class="material-icons text-lg group-hover:rotate-90 transition-transform duration-300">add</span>
-        <span class="font-bold text-sm tracking-wide">Tambah Kriteria</span>
-      </button>
-    </div>
-
-    <!-- Stats Overview Cards dengan Animasi Stagger -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <!-- Total Kriteria Card -->
-      <div class="bg-gradient-to-br from-emerald-950 to-emerald-900 rounded-2xl overflow-hidden border border-emerald-800 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 animate-in fade-in slide-in-from-bottom-4 duration-500" style="animation-delay: 0.1s">
-        <div class="bg-emerald-900/40 px-6 py-3 border-b border-emerald-800">
-          <h3 class="text-[10px] font-black text-emerald-300 uppercase tracking-widest flex items-center gap-2">
-            <span class="material-icons text-sm">assessment</span>
-            Total Kriteria
-          </h3>
-        </div>
-        <div class="p-6">
-          <div class="text-5xl font-black text-white mb-2 transition-all duration-300 group-hover:scale-110">
-            {{ dataKriteria.length }}
-          </div>
-          <p class="text-emerald-400/70 text-xs font-medium">
-            {{ dataKriteria.length === 0 ? 'Belum ada kriteria terdaftar' : 'Kriteria aktif dalam sistem' }}
-          </p>
-        </div>
-      </div>
-
-      <!-- Akumulasi Bobot Card -->
-      <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl overflow-hidden border border-slate-700 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 animate-in fade-in slide-in-from-bottom-4 duration-500" style="animation-delay: 0.2s">
-        <div class="bg-slate-800/40 px-6 py-3 border-b border-slate-700">
-          <h3 class="text-[10px] font-black text-slate-300 uppercase tracking-widest flex items-center gap-2">
-            <span class="material-icons text-sm">scale</span>
-            Akumulasi Bobot
-          </h3>
-        </div>
-        <div class="p-6">
-          <div class="flex items-baseline gap-2 mb-3">
-            <span class="text-5xl font-black transition-all duration-500"
-                  :class="totalBobot === 1.00 ? 'text-emerald-400' : 'text-amber-400'">
-              {{ totalBobot.toFixed(2) }}
-            </span>
-            <span class="text-slate-500 text-lg font-bold">/ 1.00</span>
-          </div>
-          <div class="relative w-full bg-slate-700/50 h-2 rounded-full overflow-hidden">
-            <div class="absolute inset-0 bg-gradient-to-r from-emerald-500 to-emerald-400 h-full rounded-full transition-all duration-1000 ease-out"
-                 :style="{ width: `${Math.min(totalBobot * 100, 100)}%` }">
-              <div class="absolute inset-0 bg-white/20 animate-pulse"></div>
-            </div>
-          </div>
-          <p class="text-slate-400 text-[10px] font-medium mt-3">
-            {{ totalBobot === 1.00 ? '✓ Bobot seimbang' : '⚠ Total bobot harus 1.00' }}
-          </p>
-        </div>
-      </div>
-
-      <!-- Status Kelengkapan Card -->
-      <div class="bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 animate-in fade-in slide-in-from-bottom-4 duration-500" style="animation-delay: 0.3s">
-        <div class="bg-gray-50 px-6 py-3 border-b border-gray-100 flex justify-between items-center">
-          <h3 class="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-2">
-            <span class="material-icons text-sm">info</span>
-            Status Kelengkapan
-          </h3>
-          <div class="transition-all duration-300"
-               :class="dataKriteria.length >= 2 ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'"
-               style="padding: 4px 8px; border-radius: 8px;">
-            <span class="text-[9px] font-black uppercase tracking-wider flex items-center gap-1">
-              <span class="material-icons text-xs">{{ dataKriteria.length >= 2 ? 'check_circle' : 'warning' }}</span>
-              {{ dataKriteria.length >= 2 ? 'Siap' : 'Perhatian' }}
-            </span>
-          </div>
-        </div>
-        <div class="p-6">
-          <p class="text-gray-600 text-sm leading-relaxed">
-            {{ dataKriteria.length < 2 ? 'Sistem memerlukan minimal 2 kriteria untuk memulai proses perhitungan algoritma TOPSIS.' : 'Kriteria mencukupi untuk melakukan perhitungan.' }}
-          </p>
-        </div>
+      <div class="flex gap-2">
+        <button @click="resetToDefault"
+                class="bg-gray-100 hover:bg-gray-200 text-gray-600 px-4 py-2 rounded-lg flex items-center gap-2 transition text-sm font-medium">
+          <span class="material-icons text-sm">restore</span>
+          Reset Default
+        </button>
+        <button @click="showForm = true"
+                class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition text-sm font-medium">
+          <span class="material-icons text-sm">add</span>
+          Tambah Kriteria
+        </button>
       </div>
     </div>
 
-    <!-- FORM TAMBAH KRITERIA dengan Animasi -->
-    <transition
-      enter-active-class="transition-all duration-500 ease-out"
-      enter-from-class="opacity-0 transform -translate-y-8 scale-95"
-      enter-to-class="opacity-100 transform translate-y-0 scale-100"
-      leave-active-class="transition-all duration-300 ease-in"
-      leave-from-class="opacity-100 transform translate-y-0 scale-100"
-      leave-to-class="opacity-0 transform -translate-y-8 scale-95">
-      <div v-if="showForm" class="mb-8">
-        <TambahKriteria
-          :jumlah-kriteria="dataKriteria.length"
-          @simpan="simpanKriteriaBaru"
-          @batal="showForm = false"
-          @go-home="$emit('go-home')"
-          @go-kriteria="$emit('go-kriteria')"
-        />
+    <!-- Stats Cards Sederhana -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="material-icons text-emerald-500 text-sm">assessment</span>
+          <span class="text-[10px] font-semibold text-gray-400 uppercase">Total Kriteria</span>
+        </div>
+        <p class="text-2xl font-bold text-gray-800">{{ dataKriteria.length }}</p>
       </div>
-    </transition>
 
-    <!-- Main Content Card -->
-    <div class="bg-white rounded-2xl border border-gray-200 shadow-xl overflow-hidden transition-all duration-300 hover:shadow-2xl">
-      <!-- Card Header -->
-      <div class="bg-gradient-to-r from-emerald-950 to-emerald-900 px-6 py-5">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h3 class="font-black text-white text-lg tracking-wide flex items-center gap-2">
-              <span class="material-icons">table_view</span>
-              Daftar Kriteria Keputusan
-            </h3>
-            <p class="text-emerald-400/70 text-xs mt-1">Kelola parameter penilaian untuk seleksi siswa</p>
-          </div>
-          <div class="flex gap-2">
-            <div class="bg-emerald-800/50 rounded-lg px-3 py-1.5">
-              <span class="text-emerald-300 text-[10px] font-black uppercase tracking-wider">
-                Total: {{ dataKriteria.length }} Kriteria
-              </span>
-            </div>
-          </div>
+      <div class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="material-icons text-emerald-500 text-sm">scale</span>
+          <span class="text-[10px] font-semibold text-gray-400 uppercase">Akumulasi Bobot</span>
+        </div>
+        <p class="text-2xl font-bold" :class="totalBobot === 1.00 ? 'text-emerald-600' : 'text-amber-500'">
+          {{ totalBobot.toFixed(2) }} / 1.00
+        </p>
+        <div class="mt-2 w-full bg-gray-200 h-1.5 rounded-full overflow-hidden">
+          <div class="bg-emerald-500 h-full rounded-full transition-all" :style="{ width: `${Math.min(totalBobot * 100, 100)}%` }"></div>
         </div>
       </div>
 
-      <!-- Notifikasi dengan Animasi -->
-      <transition
-        enter-active-class="transition-all duration-500 ease-out"
-        enter-from-class="opacity-0 transform -translate-y-4"
-        enter-to-class="opacity-100 transform translate-y-0"
-        leave-active-class="transition-all duration-300 ease-in"
-        leave-from-class="opacity-100 transform translate-y-0"
-        leave-to-class="opacity-0 transform -translate-y-4">
-        <div v-if="notification" class="mx-6 mt-6">
-          <div :class="notification.type === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-red-50 border-red-200 text-red-800'"
-               class="p-4 rounded-xl border flex items-center gap-3 shadow-lg animate-in fade-in slide-in-from-top-2 duration-300">
-            <div :class="notification.type === 'success' ? 'bg-emerald-500' : 'bg-red-500'"
-                 class="w-8 h-8 rounded-full flex items-center justify-center text-white shrink-0 animate-bounce">
-              <span class="material-icons text-sm">{{ notification.type === 'success' ? 'check' : 'close' }}</span>
-            </div>
-            <p class="text-sm font-bold">{{ notification.message }}</p>
-          </div>
+      <div class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="material-icons text-emerald-500 text-sm">info</span>
+          <span class="text-[10px] font-semibold text-gray-400 uppercase">Status</span>
         </div>
-      </transition>
+        <p class="text-sm font-medium" :class="dataKriteria.length >= 2 ? 'text-emerald-600' : 'text-amber-500'">
+          {{ dataKriteria.length >= 2 ? '✓ Siap melakukan perhitungan' : '⚠ Minimal 2 kriteria' }}
+        </p>
+      </div>
+    </div>
+
+    <!-- FORM TAMBAH KRITERIA -->
+    <div v-if="showForm" class="mb-6">
+      <TambahKriteria
+        :jumlah-kriteria="dataKriteria.length"
+        @simpan="simpanKriteriaBaru"
+        @batal="showForm = false"
+        @go-home="$emit('go-home')"
+        @go-kriteria="$emit('go-kriteria')"
+      />
+    </div>
+
+    <!-- Modal Konfirmasi Hapus -->
+    <div v-if="showDeleteConfirm" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div class="bg-white rounded-xl p-5 max-w-sm w-full mx-4 shadow-xl">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+            <span class="material-icons text-red-500">warning</span>
+          </div>
+          <h3 class="font-bold text-gray-800">Hapus Kriteria?</h3>
+        </div>
+        <p class="text-sm text-gray-500 mb-5">
+          Kriteria "<span class="font-semibold text-gray-700">{{ kriteriaToDelete?.nama }}</span>" akan dihapus permanen.
+        </p>
+        <div class="flex gap-3">
+          <button @click="showDeleteConfirm = false" class="flex-1 py-2 border border-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 transition">Batal</button>
+          <button @click="confirmDelete" class="flex-1 py-2 bg-red-500 text-white rounded-lg text-sm font-medium hover:bg-red-600 transition">Hapus</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notifikasi -->
+    <div v-if="notification" class="fixed bottom-6 right-6 z-50">
+      <div :class="notification.type === 'success' ? 'bg-emerald-500' : 'bg-red-500'" class="text-white px-4 py-2 rounded-lg shadow-lg text-sm">
+        {{ notification.message }}
+      </div>
+    </div>
+
+    <!-- Tabel Data Kriteria -->
+    <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+      <div class="bg-gray-50 px-5 py-3 border-b border-gray-200">
+        <h3 class="font-semibold text-gray-700 text-sm">Daftar Kriteria Keputusan</h3>
+        <p class="text-[10px] text-gray-400 mt-0.5">Kelola parameter penilaian untuk seleksi siswa</p>
+      </div>
 
       <!-- Peringatan Bobot Tidak Seimbang -->
-      <transition
-        enter-active-class="transition-all duration-500 ease-out"
-        enter-from-class="opacity-0 transform -translate-x-4"
-        enter-to-class="opacity-100 transform translate-x-0"
-        leave-active-class="transition-all duration-300 ease-in"
-        leave-from-class="opacity-100 transform translate-x-0"
-        leave-to-class="opacity-0 transform -translate-x-4">
-        <div v-if="totalBobot !== 1.00 && dataKriteria.length > 0" class="mx-6 mt-6">
-          <div class="p-5 bg-amber-50 rounded-xl border-l-4 border-l-amber-500 border border-amber-100 flex items-start gap-4 shadow-lg animate-pulse">
-            <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-amber-500 shrink-0 shadow-sm">
-              <span class="material-icons">warning</span>
-            </div>
-            <div>
-              <p class="text-sm font-black text-amber-900 uppercase tracking-tight">Konfigurasi Bobot Tidak Seimbang</p>
-              <p class="text-xs font-bold text-amber-700/80 mt-1">
-                Total bobot saat ini {{ totalBobot.toFixed(2) }}. Pastikan total berjumlah 1.00 untuk validitas algoritma TOPSIS.
-              </p>
-            </div>
-          </div>
+      <div v-if="totalBobot !== 1.00 && dataKriteria.length > 0" class="mx-5 mt-4">
+        <div class="p-3 bg-amber-50 rounded-lg border-l-4 border-l-amber-500 text-xs text-amber-700">
+          ⚠ Total bobot saat ini {{ totalBobot.toFixed(2) }}. Pastikan total berjumlah 1.00 untuk validitas algoritma TOPSIS.
         </div>
-      </transition>
+      </div>
 
-      <!-- Tabel Data Kriteria -->
       <div class="overflow-x-auto">
-        <table class="w-full">
-          <thead class="bg-gray-50 border-b-2 border-gray-200">
-            <tr>
-              <th class="px-6 py-4 text-left text-xs font-black text-gray-500 uppercase tracking-wider">No</th>
-              <th class="px-6 py-4 text-left text-xs font-black text-gray-500 uppercase tracking-wider">Kode</th>
-              <th class="px-6 py-4 text-left text-xs font-black text-gray-500 uppercase tracking-wider">Nama Kriteria</th>
-              <th class="px-6 py-4 text-left text-xs font-black text-gray-500 uppercase tracking-wider">Tipe</th>
-              <th class="px-6 py-4 text-left text-xs font-black text-gray-500 uppercase tracking-wider">Bobot</th>
-              <th class="px-6 py-4 text-right text-xs font-black text-gray-500 uppercase tracking-wider">Aksi</th>
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-gray-50 border-b border-gray-200 text-[10px] font-semibold text-gray-500 uppercase">
+              <th class="px-5 py-3 text-left w-16">No</th>
+              <th class="px-5 py-3 text-left w-20">Kode</th>
+              <th class="px-5 py-3 text-left">Nama Kriteria</th>
+              <th class="px-5 py-3 text-left w-40">Tipe</th>
+              <th class="px-5 py-3 text-left w-32">Bobot</th>
+              <th class="px-5 py-3 text-right w-24">Aksi</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
-            <tr v-for="(item, index) in dataKriteria" :key="item.id"
-                class="group hover:bg-emerald-50/30 transition-all duration-300 hover:scale-[1.01] animate-in fade-in slide-in-from-left duration-500"
-                :style="{ animationDelay: `${index * 0.05}s` }">
-              <td class="px-6 py-4">
-                <div class="w-8 h-8 bg-slate-100 rounded-xl flex items-center justify-center text-slate-500 font-black text-sm group-hover:bg-emerald-100 group-hover:text-emerald-600 transition-all duration-300">
-                  {{ index + 1 }}
-                </div>
+            <tr v-for="(item, index) in dataKriteria" :key="item.id" class="hover:bg-gray-50 transition">
+              <td class="px-5 py-3">
+                <span class="font-semibold text-gray-500 text-sm">{{ index + 1 }}</span>
               </td>
-              <td class="px-6 py-4">
-                <div class="font-bold text-emerald-700 text-sm">
-                  {{ item.kode }}
-                </div>
+              <td class="px-5 py-3">
+                <span class="font-bold text-emerald-600 text-sm">{{ item.kode }}</span>
               </td>
-              <td class="px-6 py-4">
+              <td class="px-5 py-3">
                 <input v-model="item.nama" @input="simpanPerubahan"
-                       class="w-full bg-transparent border-b-2 border-transparent hover:border-gray-300 focus:border-emerald-500 focus:outline-none px-1 -ml-1 py-1 transition-all duration-300 font-medium text-gray-700"
+                       class="w-full bg-transparent border-b border-transparent hover:border-gray-300 focus:border-emerald-500 focus:outline-none px-0 py-1 transition text-gray-700 text-sm"
                        placeholder="Nama kriteria...">
               </td>
-              <td class="px-6 py-4">
+              <td class="px-5 py-3">
                 <div class="flex gap-2">
                   <button @click="ubahTipe(index, 'benefit')"
-                          :class="item.tipe === 'benefit' ? 'bg-emerald-500 text-white shadow-md' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
-                          class="px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-300 transform hover:scale-105">
+                          :class="item.tipe === 'benefit' ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+                          class="px-3 py-1 rounded-full text-xs font-medium transition">
                     Benefit
                   </button>
                   <button @click="ubahTipe(index, 'cost')"
-                          :class="item.tipe === 'cost' ? 'bg-rose-500 text-white shadow-md' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
-                          class="px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-300 transform hover:scale-105">
+                          :class="item.tipe === 'cost' ? 'bg-rose-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+                          class="px-3 py-1 rounded-full text-xs font-medium transition">
                     Cost
                   </button>
                 </div>
               </td>
-              <td class="px-6 py-4">
-                <div class="relative w-32">
+              <td class="px-5 py-3">
+                <div class="flex items-center gap-2">
                   <input type="number" step="0.05" min="0" max="1" v-model="item.bobot" @input="simpanPerubahan"
-                         class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl text-center text-emerald-700 font-black focus:border-emerald-500 focus:outline-none transition-all duration-300">
-                  <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                    <span class="text-gray-400 text-xs font-bold">%</span>
-                  </div>
+                         class="w-20 px-2 py-1.5 border border-gray-200 rounded-lg text-center text-emerald-600 font-semibold text-sm focus:border-emerald-500 focus:outline-none">
+                  <span class="text-gray-400 text-xs">({{ (item.bobot * 100).toFixed(0) }}%)</span>
+                </div>
+                <div class="mt-1 w-20 bg-gray-100 rounded-full h-1 overflow-hidden">
+                  <div class="h-full rounded-full transition-all bg-emerald-400" :style="{ width: (item.bobot * 100) + '%' }"></div>
                 </div>
               </td>
-              <td class="px-6 py-4 text-right">
-                <button @click="hapusKriteria(index)"
-                        class="p-2 bg-red-50 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all duration-300 transform hover:scale-110 active:scale-95 group-hover:opacity-100"
-                        title="Hapus Kriteria">
-                  <span class="material-icons text-sm">delete</span>
-                </button>
+              <td class="px-5 py-3 text-right">
+                <div class="flex gap-1 justify-end">
+                  <button @click="duplikatKriteria(index)"
+                          class="p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg transition"
+                          title="Duplikat">
+                    <span class="material-icons text-sm">content_copy</span>
+                  </button>
+                  <button @click="konfirmasiHapus(index)"
+                          class="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition"
+                          title="Hapus">
+                    <span class="material-icons text-sm">delete</span>
+                  </button>
+                </div>
               </td>
             </tr>
           </tbody>
@@ -242,19 +179,14 @@
       </div>
     </div>
 
-    <!-- Tips Footer dengan Animasi -->
-    <div class="mt-8 bg-gradient-to-r from-emerald-50 to-emerald-100/30 border border-emerald-200 rounded-2xl p-6 flex items-start gap-4 shadow-lg animate-in fade-in slide-in-from-bottom-4 duration-700" style="animation-delay: 0.4s">
-      <div class="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-emerald-600 shadow-md animate-bounce">
-        <span class="material-icons">lightbulb</span>
-      </div>
-      <div>
-        <h5 class="font-black text-emerald-900 text-sm mb-1 flex items-center gap-2">
-          Tips Manajemen Kriteria
-          <span class="text-[10px] bg-emerald-200 text-emerald-800 px-2 py-0.5 rounded-full">Pro Tip</span>
-        </h5>
-        <p class="text-emerald-800/80 text-sm leading-relaxed">
-          Pastikan jumlah total bobot dari semua kriteria yang Anda masukkan berjumlah tepat <strong class="font-black text-emerald-900">1.00</strong> (atau 100%) untuk menjamin validitas perhitungan matematis pada algoritma <strong class="font-black">TOPSIS</strong>.
-        </p>
+    <!-- Tips Footer -->
+    <div class="mt-6 bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+      <div class="flex items-start gap-3">
+        <span class="material-icons text-emerald-500 text-sm">lightbulb</span>
+        <div>
+          <h5 class="font-semibold text-emerald-800 text-xs mb-0.5">Tips Manajemen Kriteria</h5>
+          <p class="text-emerald-700/80 text-xs">Pastikan total bobot semua kriteria berjumlah <strong>1.00</strong> (100%) untuk validitas perhitungan TOPSIS.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -275,8 +207,11 @@ const emit = defineEmits(['update', 'go-home', 'go-kriteria']);
 // State management
 const showForm = ref(false);
 const notification = ref(null);
+const showDeleteConfirm = ref(false);
+const kriteriaToDelete = ref(null);
+const deleteIndex = ref(null);
 
-// DATA KRITERIA FIXS (5 Kriteria sesuai musyawarah)
+// DATA KRITERIA DEFAULT (5 Kriteria)
 const defaultKriteria = [
     { id: 1, kode: 'C1', nama: 'IPK', tipe: 'benefit', bobot: 0.30 },
     { id: 2, kode: 'C2', nama: 'Kehadiran', tipe: 'benefit', bobot: 0.20 },
@@ -297,6 +232,54 @@ const showNotification = (message, type = 'success') => {
     setTimeout(() => { notification.value = null; }, 3000);
 };
 
+// Reset ke default
+const resetToDefault = () => {
+    if(confirm('Reset ke 5 kriteria default? Data yang diubah akan hilang.')) {
+        emit('update', defaultKriteria);
+        showNotification("Kriteria dikembalikan ke default.");
+    }
+};
+
+// Konfirmasi hapus dengan modal
+const konfirmasiHapus = (index) => {
+    kriteriaToDelete.value = props.dataKriteria[index];
+    deleteIndex.value = index;
+    showDeleteConfirm.value = true;
+};
+
+const confirmDelete = () => {
+    if(deleteIndex.value !== null) {
+        const newData = [...props.dataKriteria];
+        newData.splice(deleteIndex.value, 1);
+
+        // Update kode
+        newData.forEach((item, i) => {
+            item.kode = 'C' + (i + 1);
+        });
+
+        emit('update', newData);
+        showNotification("Kriteria berhasil dihapus.");
+    }
+    showDeleteConfirm.value = false;
+    kriteriaToDelete.value = null;
+    deleteIndex.value = null;
+};
+
+// Duplikat kriteria
+const duplikatKriteria = (index) => {
+    const item = props.dataKriteria[index];
+    const newData = [...props.dataKriteria];
+    newData.push({
+        id: Date.now(),
+        kode: `C${newData.length + 1}`,
+        nama: `${item.nama} (Copy)`,
+        tipe: item.tipe,
+        bobot: item.bobot
+    });
+    emit('update', newData);
+    showNotification("Kriteria berhasil diduplikasi.");
+};
+
 // CRUD Operations
 const simpanKriteriaBaru = (dataBaru) => {
     const newData = [...props.dataKriteria];
@@ -310,40 +293,23 @@ const simpanKriteriaBaru = (dataBaru) => {
 
     emit('update', newData);
     showForm.value = false;
-    showNotification("Kriteria baru berhasil ditambahkan!", "success");
-};
-
-const hapusKriteria = (index) => {
-    if(confirm('Yakin ingin menghapus kriteria ini?')) {
-        const newData = [...props.dataKriteria];
-        newData.splice(index, 1);
-
-        // Update kode
-        newData.forEach((item, i) => {
-            item.kode = 'C' + (i + 1);
-        });
-
-        emit('update', newData);
-        showNotification("Kriteria berhasil dihapus.", "success");
-    }
+    showNotification("Kriteria baru berhasil ditambahkan!");
 };
 
 const ubahTipe = (index, tipeBaru) => {
     const newData = [...props.dataKriteria];
     newData[index].tipe = tipeBaru;
     emit('update', newData);
-    showNotification(`Tipe kriteria diubah menjadi ${tipeBaru}.`, "success");
+    showNotification(`Tipe kriteria diubah menjadi ${tipeBaru}.`);
 };
 
 const simpanPerubahan = () => {
     emit('update', props.dataKriteria);
 };
 
-// INISIALISASI DATA FIXS SAAT KOMPONEN DIMOUNT
+// INISIALISASI DATA SAAT KOMPONEN DIMOUNT
 onMounted(() => {
-    // Cek apakah data kriteria masih kosong
     if (props.dataKriteria.length === 0) {
-        // Kirim data kriteria fixs ke parent
         emit('update', defaultKriteria);
     }
 });
@@ -351,103 +317,7 @@ onMounted(() => {
 
 <style scoped>
 @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-
-/* Custom Animations */
-@keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slide-in-from-top-4 {
-  from { transform: translateY(-1rem); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-@keyframes slide-in-from-bottom-4 {
-  from { transform: translateY(1rem); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-@keyframes slide-in-from-left {
-  from { transform: translateX(-1rem); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
-}
-
-@keyframes zoom-in {
-  from { transform: scale(0.95); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
-}
-
-@keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-
-.animate-in {
-  animation-fill-mode: both;
-}
-
-.fade-in {
-  animation-name: fade-in;
-}
-
-.slide-in-from-top-4 {
-  animation-name: slide-in-from-top-4;
-}
-
-.slide-in-from-bottom-4 {
-  animation-name: slide-in-from-bottom-4;
-}
-
-.slide-in-from-left {
-  animation-name: slide-in-from-left;
-}
-
-.zoom-in {
-  animation-name: zoom-in;
-}
-
-.animate-bounce {
-  animation: bounce 1s ease-in-out infinite;
-}
-
-.animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-.duration-500 {
-  animation-duration: 500ms;
-}
-
-.duration-700 {
-  animation-duration: 700ms;
-}
-
-/* Range Input Custom Styles */
-input[type=range]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  height: 20px;
-  width: 20px;
-  border-radius: 50%;
-  background: #10b981;
-  cursor: pointer;
-  box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
-  margin-top: -6px;
-}
-
-input[type=range]::-webkit-slider-runnable-track {
-  width: 100%;
-  height: 8px;
-  cursor: pointer;
-  background: #1f2937;
-  border-radius: 4px;
-}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 /* Hilangkan spinner di input number */
 input[type=number]::-webkit-inner-spin-button,
@@ -458,8 +328,8 @@ input[type=number]::-webkit-outer-spin-button {
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -468,11 +338,11 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #10b981;
+  background: #cbd5e1;
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #059669;
+  background: #10b981;
 }
 </style>

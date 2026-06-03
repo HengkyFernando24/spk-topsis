@@ -5,7 +5,6 @@
         <aside class="fixed left-0 top-0 h-full w-72 z-50 bg-gradient-to-b from-emerald-950 via-green-950 to-emerald-950 text-white flex flex-col py-6 shadow-2xl no-print">
             <div class="absolute top-0 left-0 w-full h-64 bg-emerald-400 opacity-5 blur-[100px] rounded-full pointer-events-none"></div>
                 <div class="px-8 mb-10 flex items-center gap-4 relative z-10">
-                    <!-- Logo Analytics -->
                     <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center text-white shadow-lg">
                         <span class="material-symbols-outlined !text-3xl">analytics</span>
                     </div>
@@ -50,21 +49,20 @@
 
                 <!-- FORM TAMBAH / EDIT SISWA -->
                 <div v-if="showStudentForm" class="animate-in fade-in duration-700">
-                    <TambahSiswa
+                    <TambahDataMahasiswa
                         :data-kriteria="criteria"
                         :edit-data="editingStudent"
                         @close="closeStudentForm"
                         @save="saveStudent"
                     />
                 </div>
-
                 <!-- DASHBOARD TAB -->
                 <div v-else-if="activeTab === 'dashboard'" class="space-y-8 animate-in fade-in duration-700">
 
                     <!-- Welcome Banner -->
                     <div class="bg-gradient-to-r from-emerald-600 to-emerald-800 rounded-2xl p-6 text-white relative overflow-hidden shadow-lg">
                         <div class="absolute right-0 top-0 opacity-10">
-                            <span class="material-symbols-outlined text-8xl">analytics</span>
+
                         </div>
                         <div class="relative z-10">
                             <h2 class="text-xl font-black">Selamat Datang, Administrator!</h2>
@@ -74,6 +72,76 @@
                                 <span class="text-[10px] bg-white/20 rounded-full px-3 py-1">🎯 Akurasi Tinggi</span>
                                 <span class="text-[10px] bg-white/20 rounded-full px-3 py-1">⚡ Real-time Analysis</span>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- FILTER DATA -->
+                    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="material-icons text-emerald-600 text-sm">filter_alt</span>
+                            <h4 class="font-semibold text-gray-700 text-sm">Filter Data</h4>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                            <!-- Filter Fakultas -->
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-500 mb-1">Fakultas</label>
+                                <select v-model="selectedFakultas" @change="onFakultasChange"
+                                        class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-emerald-500 focus:outline-none">
+                                    <option v-for="f in fakultasList" :key="f.id" :value="f.id">
+                                        {{ f.nama }}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <!-- Filter Prodi -->
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-500 mb-1">Program Studi</label>
+                                <select v-model="selectedProdi"
+                                        class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-emerald-500 focus:outline-none">
+                                    <option v-for="p in filteredProdi" :key="p.id" :value="p.id">
+                                        {{ p.nama }}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <!-- Filter Angkatan -->
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-500 mb-1">Angkatan</label>
+                                <select v-model="selectedAngkatan"
+                                        class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-emerald-500 focus:outline-none">
+                                    <option v-for="a in angkatanList" :key="a.id" :value="a.id">
+                                        {{ a.tahun }}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <!-- Filter Semester -->
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-500 mb-1">Semester</label>
+                                <select v-model="selectedSemester"
+                                        class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-emerald-500 focus:outline-none">
+                                    <option v-for="s in semesterList" :key="s.id" :value="s.id">
+                                        {{ s.nama }}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <!-- Filter Kelas (BARU) -->
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-500 mb-1">Kelas</label>
+                                <select v-model="selectedKelas"
+                                        class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-emerald-500 focus:outline-none">
+                                    <option value="">-- Semua Kelas --</option>
+                                    <option v-for="k in kelasList" :key="k.id" :value="k.id">
+                                        {{ k.nama }}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mt-3 text-right">
+                            <span class="text-[10px] text-gray-400">
+                                Menampilkan {{ filteredStudentsByGroup.length }} dari {{ students.length }} mahasiswa
+                            </span>
                         </div>
                     </div>
 
@@ -95,7 +163,6 @@
 
                     <!-- Chart & Activity -->
                     <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-                        <!-- Chart -->
                         <div class="xl:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
                             <div class="flex justify-between items-center mb-6">
                                 <div>
@@ -109,7 +176,6 @@
                                     </div>
                                 </div>
                             </div>
-
                             <div class="relative h-64">
                                 <div class="absolute inset-0 flex flex-col justify-between pointer-events-none z-0">
                                     <div v-for="i in 4" :key="i" class="w-full border-t border-slate-100 border-dashed"></div>
@@ -131,8 +197,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Activity -->
                         <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
                             <div class="flex items-center justify-between mb-6">
                                 <h3 class="text-lg font-black text-slate-800">Aktivitas Terbaru</h3>
@@ -155,7 +219,7 @@
                         </div>
                     </div>
 
-                    <!-- ========== TAMBAHAN: RINGKASAN NILAI PER KRITERIA ========== -->
+                    <!-- RINGKASAN NILAI PER KRITERIA -->
                     <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
                         <div class="flex items-center justify-between mb-6">
                             <div>
@@ -166,9 +230,7 @@
                                 <p class="text-xs text-slate-400 mt-1">Rata-rata nilai mahasiswa untuk setiap kriteria</p>
                             </div>
                         </div>
-
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                            <!-- IPK - Warna Biru -->
                             <div v-for="(kriteria, idx) in criteria" :key="kriteria.id"
                                 class="rounded-xl p-4 border transition-all duration-300 hover:shadow-md hover:-translate-y-1"
                                 :class="getKriteriaCardClass(idx)">
@@ -194,69 +256,74 @@
                         </div>
                     </div>
 
-                    <!-- ========== TABEL DETAIL NILAI MAHASISWA - ELEGAN & PROFESIONAL ========== -->
+                    <!-- TABEL DETAIL NILAI MAHASISWA -->
                     <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                    <div class="bg-gray-50 px-5 py-3 border-b border-gray-200">
-                        <div class="flex items-center justify-between">
-                        <div>
-                            <h3 class="font-semibold text-gray-800 text-sm flex items-center gap-2">
-                            <span class="material-icons text-emerald-600 text-sm">table_chart</span>
-                            Detail Nilai Mahasiswa
-                            </h3>
-                            <p class="text-[10px] text-gray-400 mt-0.5">Nilai mentah setiap mahasiswa untuk semua kriteria</p>
-                        </div>
-                        <div class="bg-emerald-50 text-emerald-700 text-[10px] font-medium px-2 py-0.5 rounded">
-                            Total: {{ students.length }} Mahasiswa
-                        </div>
-                        </div>
-                    </div>
-
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm">
-                        <thead>
-                            <tr class="bg-gray-50 border-b border-gray-200 text-[10px] font-semibold text-gray-500 uppercase">
-                            <th class="px-4 py-2 text-center w-12">No</th>
-                            <th class="px-4 py-2 text-left">Nama Mahasiswa</th>
-                            <th v-for="kriteria in criteria" :key="kriteria.id" class="px-3 py-2 text-center min-w-[70px]">
-                                {{ kriteria.nama }}
-                            </th>
-                            <th class="px-3 py-2 text-center w-24">Nilai V</th>
-                            <th class="px-3 py-2 text-center w-24">Peringkat</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100">
-                            <tr v-for="(siswa, index) in sortedStudentsByV" :key="siswa.id"
-                                class="hover:bg-gray-50 transition-colors"
-                                :class="index === 0 ? 'bg-emerald-50/20' : ''">
-                            <td class="px-4 py-2 text-center font-medium text-gray-500">{{ index + 1 }}</td>
-                            <td class="px-4 py-2 font-medium text-gray-800">{{ siswa.nama }}</td>
-                            <td v-for="kriteria in criteria" :key="kriteria.id" class="px-3 py-2 text-center text-gray-600">
-                                {{ getNilaiMahasiswa(siswa.id, kriteria.id) }}
-                            </td>
-                            <td class="px-3 py-2 text-center">
-                                <span class="font-semibold" :class="index === 0 ? 'text-emerald-600' : 'text-gray-700'">
-                                {{ ((siswa.v || 0) * 100).toFixed(2) }}%
-                                </span>
-                            </td>
-                            <td class="px-3 py-2 text-center">
-                                <span v-if="index === 0" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-semibold bg-emerald-100 text-emerald-700">
-                                <span class="material-icons text-xs">stars</span> Terbaik
-                                </span>
-                                <span v-else class="text-gray-400 text-[10px]">Peringkat {{ index + 1 }}</span>
-                            </td>
-                            </tr>
-                            <tr v-if="students.length === 0">
-                            <td :colspan="3 + criteria.length" class="px-4 py-12 text-center text-gray-400">
-                                <div class="flex flex-col items-center gap-2">
-                                <span class="material-icons text-4xl">school</span>
-                                <p>Belum ada data mahasiswa</p>
-                                <p class="text-xs">Silakan tambahkan data mahasiswa melalui menu Data Siswa</p>
+                        <div class="bg-gray-50 px-5 py-3 border-b border-gray-200">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h3 class="font-semibold text-gray-800 text-sm flex items-center gap-2">
+                                        <span class="material-icons text-emerald-600 text-sm">table_chart</span>
+                                        Detail Nilai Mahasiswa
+                                    </h3>
+                                    <p class="text-[10px] text-gray-400 mt-0.5">Nilai mentah setiap mahasiswa untuk semua kriteria</p>
                                 </div>
-                            </td>
-                            </tr>
-                        </tbody>
-                        </table>
-                    </div>
+                                <div class="bg-emerald-50 text-emerald-700 text-[10px] font-medium px-2 py-0.5 rounded">
+                                    Total: {{ filteredStudentsByGroup.length }} Mahasiswa
+                                </div>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="bg-gray-50 border-b border-gray-200 text-[10px] font-semibold text-gray-500 uppercase">
+                                        <th class="px-4 py-2 text-center w-12">No</th>
+                                        <th class="px-4 py-2 text-left">NIM</th>
+                                        <th class="px-4 py-2 text-left">Nama Mahasiswa</th>
+                                        <th class="px-4 py-2 text-left">Kelas</th>
+                                        <th v-for="kriteria in criteria" :key="kriteria.id" class="px-3 py-2 text-center min-w-[70px]">
+                                            {{ kriteria.nama }}
+                                        </th>
+                                        <th class="px-3 py-2 text-center w-24">Nilai V</th>
+                                        <th class="px-3 py-2 text-center w-24">Peringkat</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100">
+                                    <tr v-for="(siswa, index) in filteredSortedStudents" :key="siswa.id"
+                                        class="hover:bg-gray-50 transition-colors"
+                                        :class="index === 0 ? 'bg-emerald-50/20' : ''">
+                                        <td class="px-4 py-2 text-center font-medium text-gray-500">{{ index + 1 }}</td>
+                                        <td class="px-4 py-2 font-medium text-gray-800">{{ siswa.nim || '-' }}</td>
+                                        <td class="px-4 py-2 font-medium text-gray-800">{{ siswa.nama }}</td>
+                                        <td class="px-4 py-2 font-medium text-gray-600">
+                                            {{ getKelasNama(siswa.kelas_id) }}
+                                        </td>
+                                        <td v-for="kriteria in criteria" :key="kriteria.id" class="px-3 py-2 text-center text-gray-600">
+                                            {{ getNilaiMahasiswaBySemester(siswa.id, selectedSemester, kriteria.id) }}
+                                        </td>
+                                        <td class="px-3 py-2 text-center">
+                                            <span class="font-semibold" :class="index === 0 ? 'text-emerald-600' : 'text-gray-700'">
+                                                {{ ((siswa.v || 0) * 100).toFixed(2) }}%
+                                            </span>
+                                        </td>
+                                        <td class="px-3 py-2 text-center">
+                                            <span v-if="index === 0" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-semibold bg-emerald-100 text-emerald-700">
+                                                <span class="material-icons text-xs">stars</span> Terbaik
+                                            </span>
+                                            <span v-else class="text-gray-400 text-[10px]">Peringkat {{ index + 1 }}</span>
+                                        </td>
+                                    </tr>
+                                    <tr v-if="filteredStudentsByGroup.length === 0">
+                                    <td :colspan="4 + criteria.length" class="px-4 py-12 text-center align-middle">
+                                        <div class="flex flex-col items-center justify-center gap-2">
+                                        <span class="material-icons text-4xl text-gray-400">school</span>
+                                        <p class="text-gray-500 font-medium">Tidak ada data mahasiswa untuk filter ini</p>
+                                        <p class="text-xs text-gray-400">Silakan ubah filter atau tambahkan data mahasiswa</p>
+                                        </div>
+                                    </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
 
                     <!-- Topsis Table -->
@@ -274,8 +341,8 @@
                                 Export PDF
                             </button>
                         </div>
-                        <TopsisTable v-if="rankedStudents.length > 0 && rankedStudents[0]?.v !== undefined" :data-mahasiswa="rankedStudents" />
-                        <div v-else-if="rankedStudents.length > 0 && rankedStudents[0]?.v === undefined" class="p-16 text-center">
+                        <TopsisTable v-if="filteredRankedStudents.length > 0 && filteredRankedStudents[0]?.v !== undefined" :data-mahasiswa="filteredRankedStudents" />
+                        <div v-else-if="filteredStudentsByGroup.length > 0 && filteredRankedStudents[0]?.v === undefined" class="p-16 text-center">
                             <div class="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <span class="material-symbols-outlined text-3xl text-amber-500">calculate</span>
                             </div>
@@ -302,9 +369,9 @@
                     />
                 </div>
 
-                <!-- DATA SISWA TAB -->
-                <div v-else-if="activeTab === 'data-siswa'" class="animate-in fade-in duration-700">
-                    <DataSiswa
+                <!-- DATA MAHASISWA TAB -->
+                <div v-else-if="activeTab === 'data-mahasiswa'" class="animate-in fade-in duration-700">
+                    <DataMahasiswa
                         :students-data="students"
                         :data-kriteria="criteria"
                         @update="updateStudents"
@@ -323,12 +390,12 @@
                         @update-hasil="handleHasilPerhitungan"
                     />
                 </div>
-                    <!-- LAPORAN TAB -->
+                <!-- LAPORAN TAB -->
                 <div v-else-if="activeTab === 'laporan'" class="animate-in fade-in duration-700">
-                <Laporan
-                    :data-mahasiswa="students"
-                    :data-kriteria="criteria"
-                />
+                    <Laporan
+                        :data-mahasiswa="students"
+                        :data-kriteria="criteria"
+                    />
                 </div>
 
             </main>
@@ -361,70 +428,73 @@
         </div>
     </div>
 
-<div v-if="showLogoutPopup" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300">
-            <div class="bg-white rounded-3xl p-8 max-w-sm w-full mx-4 shadow-2xl border border-slate-100 relative overflow-hidden">
-                <div class="absolute -right-10 -top-10 w-32 h-32 bg-rose-50 rounded-full blur-2xl pointer-events-none opacity-60"></div>
-                
-                <div class="relative z-10">
-                    <div class="w-16 h-16 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner border border-rose-100">
-                        <span class="material-symbols-outlined !text-4xl">logout</span>
-                    </div>
-                    <h3 class="text-xl font-black text-slate-800 text-center tracking-tight mb-2">Keluar Sistem?</h3>
-                    <p class="text-sm text-slate-500 text-center font-medium mb-8 leading-relaxed">
-                        Apakah Anda yakin ingin keluar dari SPK TOPSIS?
-                    </p>
-                    <div class="flex gap-4">
-                        <button @click="showLogoutPopup = false" class="flex-1 py-3.5 bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-slate-700 rounded-xl text-xs font-black tracking-widest uppercase transition-all">
-                            Batal
-                        </button>
-                        <button @click="prosesLogout" :disabled="isLoggingOut" class="flex-1 py-3.5 bg-rose-500 text-white hover:bg-rose-600 rounded-xl text-xs font-black tracking-widest uppercase transition-all shadow-lg hover:shadow-rose-200 flex justify-center items-center gap-2 disabled:opacity-50">
-                            <span v-if="isLoggingOut" class="material-symbols-outlined animate-spin !text-lg">progress_activity</span>
-                            <span v-else>Ya, Keluar</span>
-                        </button>
-                    </div>
+    <!-- LOGOUT POPUP -->
+    <div v-if="showLogoutPopup" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300">
+        <div class="bg-white rounded-3xl p-8 max-w-sm w-full mx-4 shadow-2xl border border-slate-100 relative overflow-hidden">
+            <div class="absolute -right-10 -top-10 w-32 h-32 bg-rose-50 rounded-full blur-2xl pointer-events-none opacity-60"></div>
+            <div class="relative z-10">
+                <div class="w-16 h-16 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner border border-rose-100">
+                    <span class="material-symbols-outlined !text-4xl">logout</span>
+                </div>
+                <h3 class="text-xl font-black text-slate-800 text-center tracking-tight mb-2">Keluar Sistem?</h3>
+                <p class="text-sm text-slate-500 text-center font-medium mb-8 leading-relaxed">
+                    Apakah Anda yakin ingin keluar dari SPK TOPSIS?
+                </p>
+                <div class="flex gap-4">
+                    <button @click="showLogoutPopup = false" class="flex-1 py-3.5 bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-slate-700 rounded-xl text-xs font-black tracking-widest uppercase transition-all">
+                        Batal
+                    </button>
+                    <button @click="prosesLogout" :disabled="isLoggingOut" class="flex-1 py-3.5 bg-rose-500 text-white hover:bg-rose-600 rounded-xl text-xs font-black tracking-widest uppercase transition-all shadow-lg hover:shadow-rose-200 flex justify-center items-center gap-2 disabled:opacity-50">
+                        <span v-if="isLoggingOut" class="material-symbols-outlined animate-spin !text-lg">progress_activity</span>
+                        <span v-else>Ya, Keluar</span>
+                    </button>
                 </div>
             </div>
         </div>
-
+    </div>
 
 </template>
 
 <script setup>
-import axios from 'axios'; // Pastikan axios udah di-import ya blay
-import { ref, computed, onMounted } from 'vue';
+import axios from 'axios';
+import { ref, computed, onMounted, watch } from 'vue';
 import TopsisTable from '../Components/TopsisTable.vue';
 import KriteriaManager from '../Components/KriteriaManager.vue';
-import DataSiswa from '../Components/DataSiswa.vue';
+import DataMahasiswa from '../Components/DataMahasiswa.vue';
 import Perhitungan from '../Components/Perhitungan.vue';
-import TambahSiswa from '../Components/TambahSiswa.vue';
+import TambahDataMahasiswa from '../Components/TambahDataMahasiswa.vue';
 import StatsCard from '../Components/StatsCard.vue';
 import Laporan from '../Components/Laporan.vue';
 
 
-// STATE UNTUK POP-UP LOGOUT
+// ========== LOGOUT ==========
 const showLogoutPopup = ref(false);
 const isLoggingOut = ref(false);
 
-// FUNGSI EKSEKUSI LOGOUT
 const prosesLogout = () => {
-    // 1. Fire and Forget: Tembak ke Laravel tapi gak usah ditungguin balesannya
-    axios.post('/logout'); 
-
-    // 2. Langsung ganti halaman secara paksa (replace biar gak bisa di-back)
+    axios.post('/logout');
     window.location.replace('/login');
 };
 
 // ========== WARNA UNTUK SETIAP CARD KRITERIA ==========
 const getKriteriaCardClass = (index) => {
     const colors = [
-        'bg-gradient-to-br from-blue-500 to-blue-700',     // IPK
-        'bg-gradient-to-br from-teal-500 to-teal-700',     // Kehadiran
-        'bg-gradient-to-br from-emerald-500 to-emerald-700', // Prestasi
-        'bg-gradient-to-br from-amber-500 to-amber-700',   // Keterlambatan
-        'bg-gradient-to-br from-purple-500 to-purple-700'  // Tugas
+        'bg-gradient-to-br from-blue-500 to-blue-700',
+        'bg-gradient-to-br from-teal-500 to-teal-700',
+        'bg-gradient-to-br from-emerald-500 to-emerald-700',
+        'bg-gradient-to-br from-amber-500 to-amber-700',
+        'bg-gradient-to-br from-purple-500 to-purple-700'
     ];
     return colors[index % colors.length];
 };
+
+// ========== DATA KELAS DEFAULT ==========
+const defaultKelas = [
+    { id: 1, nama: "Reguler - C01", kode: "C01", kelompok: "Reguler" },
+    { id: 2, nama: "Reguler - C02", kode: "C02", kelompok: "Reguler" },
+    { id: 3, nama: "Reguler - B01", kode: "B01", kelompok: "Reguler" },
+    { id: 4, nama: "Karyawan - K01", kode: "K01", kelompok: "Karyawan" }
+];
 
 // ========== STATE MANAGEMENT ==========
 const activeTab = ref('dashboard');
@@ -434,6 +504,10 @@ const dataPenilaian = ref([]);
 const showStudentForm = ref(false);
 const editingStudent = ref(null);
 const perhitunganComponent = ref(null);
+const penilaianPerSemester = ref([]);
+
+// Data Kelas
+const kelasList = ref([]);
 
 // Toast Notification
 const toast = ref({ show: false, type: 'success', title: '', message: '' });
@@ -445,13 +519,13 @@ const showToast = (type, title, message) => {
 
 // Recent Activities
 const recentActivities = ref([
-    { icon: 'person_add', title: 'Data siswa baru ditambahkan', time: 'baru saja', bgColor: 'bg-emerald-50', iconColor: 'text-emerald-600' },
+    { icon: 'person_add', title: 'Data mahasiswa baru ditambahkan', time: 'baru saja', bgColor: 'bg-emerald-50', iconColor: 'text-emerald-600' },
     { icon: 'edit_note', title: 'Kriteria diperbarui', time: 'baru saja', bgColor: 'bg-blue-50', iconColor: 'text-blue-600' },
     { icon: 'calculate', title: 'Perhitungan TOPSIS dilakukan', time: 'baru saja', bgColor: 'bg-purple-50', iconColor: 'text-purple-600' },
     { icon: 'file_upload', title: 'Import data excel', time: 'baru saja', bgColor: 'bg-green-50', iconColor: 'text-green-600' }
 ]);
 
-// ========== DATA KRITERIA DEFAULT (5 KRITERIA FIXS) ==========
+// ========== DATA KRITERIA DEFAULT ==========
 const defaultKriteria = [
     { id: 1, kode: 'C1', nama: 'IPK', tipe: 'benefit', bobot: 0.30 },
     { id: 2, kode: 'C2', nama: 'Kehadiran', tipe: 'benefit', bobot: 0.20 },
@@ -459,6 +533,19 @@ const defaultKriteria = [
     { id: 4, kode: 'C4', nama: 'Keterlambatan', tipe: 'cost', bobot: 0.10 },
     { id: 5, kode: 'C5', nama: 'Tugas', tipe: 'benefit', bobot: 0.25 }
 ];
+
+// ========== DATA MASTER UNTUK FILTER ==========
+const fakultasList = ref([]);
+const prodiList = ref([]);
+const angkatanList = ref([]);
+const semesterList = ref([]);
+
+// Filter yang dipilih user
+const selectedFakultas = ref(3);
+const selectedProdi = ref(8);
+const selectedAngkatan = ref(4);
+const selectedSemester = ref(4);
+const selectedKelas = ref(''); // Filter Kelas (BARU)
 
 // ========== FUNGSI NAVIGASI MENU ==========
 const handleMenuClick = (menuId) => {
@@ -476,32 +563,105 @@ const handleTambahSiswa = () => {
     activeTab.value = null;
 };
 
+const closeStudentForm = () => {
+    showStudentForm.value = false;
+    editingStudent.value = null;
+    activeTab.value = 'data-mahasiswa';
+};
+
 const handleEditSiswa = (siswa) => {
-    editingStudent.value = siswa;
+    const penilaian = penilaianPerSemester.value.find(
+        p => p.mahasiswa_id === siswa.id && p.semester_id === 4
+    );
+
+    editingStudent.value = {
+        ...siswa,
+        semester_id: 4,
+        nilai: penilaian?.nilai || {}
+    };
     showStudentForm.value = true;
     activeTab.value = null;
 };
 
-const closeStudentForm = () => {
-    showStudentForm.value = false;
-    editingStudent.value = null;
-    activeTab.value = 'data-siswa';
-};
-
 const saveStudent = (newSiswa) => {
-    if (editingStudent.value) {
-        const index = students.value.findIndex(s => s.id === newSiswa.id);
-        if (index !== -1) {
-            students.value[index] = newSiswa;
-        }
-        showToast('success', 'Berhasil', 'Data siswa berhasil diperbarui!');
-    } else {
-        students.value.push(newSiswa);
-        showToast('success', 'Berhasil', 'Data siswa berhasil ditambahkan!');
+  console.log('📝 Menyimpan siswa:', newSiswa);
+
+  // ========== PERBAIKAN: Ambil data terbaru dari localStorage ==========
+  let currentStudents = JSON.parse(localStorage.getItem('mahasiswa') || '[]');
+  let currentPenilaian = JSON.parse(localStorage.getItem('penilaian') || '[]');
+
+  if (editingStudent.value) {
+    // ========== MODE EDIT ==========
+    const index = currentStudents.findIndex(s => s.id === newSiswa.id);
+    if (index !== -1) {
+      currentStudents[index] = {
+        ...currentStudents[index],
+        nim: newSiswa.nim,
+        nama: newSiswa.nama,
+        fakultas_id: newSiswa.fakultas_id,
+        prodi_id: newSiswa.prodi_id,
+        angkatan_id: newSiswa.angkatan_id,
+        kelas_id: newSiswa.kelas_id
+      };
     }
-    generateDataPenilaian();
-    localStorage.setItem('mahasiswa', JSON.stringify(students.value));
-    closeStudentForm();
+
+    // Update nilai
+    const penilaianIndex = currentPenilaian.findIndex(
+      p => p.mahasiswa_id === newSiswa.id && p.semester_id === newSiswa.semester_id
+    );
+
+    if (penilaianIndex !== -1) {
+      currentPenilaian[penilaianIndex].nilai = newSiswa.nilai;
+    } else {
+      currentPenilaian.push({
+        mahasiswa_id: newSiswa.id,
+        semester_id: newSiswa.semester_id,
+        nilai: newSiswa.nilai
+      });
+    }
+    showToast('success', 'Berhasil', 'Data Mahasiswa berhasil diperbarui!');
+  } else {
+    // ========== MODE TAMBAH ==========
+    const newId = Date.now();
+
+    // Cek apakah NIM sudah ada
+    if (currentStudents.find(s => s.nim === newSiswa.nim)) {
+      showToast('error', 'Gagal', `NIM ${newSiswa.nim} sudah ada!`);
+      return;
+    }
+
+    currentStudents.push({
+      id: newId,
+      nim: newSiswa.nim,
+      nama: newSiswa.nama,
+      fakultas_id: newSiswa.fakultas_id,
+      prodi_id: newSiswa.prodi_id,
+      angkatan_id: newSiswa.angkatan_id,
+      kelas_id: newSiswa.kelas_id,
+      v: 0
+    });
+
+    currentPenilaian.push({
+      mahasiswa_id: newId,
+      semester_id: newSiswa.semester_id,
+      nilai: newSiswa.nilai
+    });
+
+    showToast('success', 'Berhasil', 'Data Mahasiswa berhasil ditambahkan!');
+  }
+
+  // ========== SIMPAN KE LOCALSTORAGE ==========
+  localStorage.setItem('mahasiswa', JSON.stringify(currentStudents));
+  localStorage.setItem('penilaian', JSON.stringify(currentPenilaian));
+
+  // ========== UPDATE STATE ==========
+  students.value = currentStudents;
+  penilaianPerSemester.value = currentPenilaian;
+
+  generateDataPenilaian();
+  closeStudentForm();
+
+  console.log('✅ Total mahasiswa setelah simpan:', students.value.length);
 };
 
 // ========== FUNGSI UNTUK MENERIMA HASIL PERHITUNGAN TOPSIS ==========
@@ -511,7 +671,7 @@ const handleHasilPerhitungan = (hasil) => {
         if (hasilPerhitungan) {
             return {
                 ...siswa,
-                v: hasilPerhitungan.v
+                v: hasilPerhitungan.v || hasilPerhitungan.preferensi || 0
             };
         }
         return siswa;
@@ -525,12 +685,29 @@ const handleHasilPerhitungan = (hasil) => {
 
 // ========== FUNGSI UNTUK MENGOLAH DATA PENILAIAN ==========
 const generateDataPenilaian = () => {
+    // Pastikan penilaianPerSemester sudah terisi
+    if (penilaianPerSemester.value.length === 0) {
+        const savedPenilaian = localStorage.getItem('penilaian');
+        if (savedPenilaian) {
+            penilaianPerSemester.value = JSON.parse(savedPenilaian);
+            console.log('✅ Data penilaian dimuat dari localStorage:', penilaianPerSemester.value.length);
+        }
+    }
+
     const penilaian = [];
+
+    // Loop semua mahasiswa
     students.value.forEach(mahasiswa => {
-        if (mahasiswa.nilai && typeof mahasiswa.nilai === 'object') {
+        // Cari nilai dari penilaianPerSemester berdasarkan semester yang dipilih
+        const nilaiSiswa = penilaianPerSemester.value.find(
+            p => p.mahasiswa_id === mahasiswa.id && p.semester_id === selectedSemester.value
+        );
+
+        if (nilaiSiswa && nilaiSiswa.nilai) {
+            // Loop semua kriteria
             criteria.value.forEach(kriteria => {
-                const nilai = mahasiswa.nilai[kriteria.id];
-                if (nilai !== undefined && nilai !== null) {
+                const nilai = nilaiSiswa.nilai[kriteria.id];
+                if (nilai !== undefined && nilai !== null && !isNaN(nilai)) {
                     penilaian.push({
                         mahasiswaId: mahasiswa.id,
                         kriteriaId: kriteria.id,
@@ -540,7 +717,9 @@ const generateDataPenilaian = () => {
             });
         }
     });
+
     dataPenilaian.value = penilaian;
+    console.log('✅ DataPenilaian generated:', dataPenilaian.value.length);
 };
 
 // ========== FUNGSI UPDATE DATA ==========
@@ -548,7 +727,7 @@ const updateStudents = (newData) => {
     students.value = newData;
     generateDataPenilaian();
     localStorage.setItem('mahasiswa', JSON.stringify(newData));
-    showToast('success', 'Berhasil', 'Data siswa berhasil disimpan!');
+    showToast('success', 'Berhasil', 'Data Mahasiswa berhasil disimpan!');
 };
 
 const updateCriteria = (newData) => {
@@ -567,47 +746,100 @@ const getNilaiMahasiswa = (siswaId, kriteriaId) => {
     return '-';
 };
 
+// ========== FUNGSI GET NILAI PER SEMESTER ==========
+const getNilaiMahasiswaBySemester = (mahasiswaId, semesterId, kriteriaId) => {
+    const penilaian = penilaianPerSemester.value.find(
+        p => p.mahasiswa_id === mahasiswaId && p.semester_id === semesterId
+    );
+    if (penilaian && penilaian.nilai && penilaian.nilai[kriteriaId] !== undefined) {
+        return penilaian.nilai[kriteriaId];
+    }
+    return '-';
+};
+
+// ========== FUNGSI GET NAMA KELAS ==========
+const getKelasNama = (kelasId) => {
+    if (!kelasId) return '-';
+    const kelas = kelasList.value.find(k => k.id === kelasId);
+    return kelas ? kelas.nama : '-';
+};
+
 const getRataRataNilai = (kriteriaId) => {
-    const nilaiSemua = students.value
-        .map(s => s.nilai && s.nilai[kriteriaId])
-        .filter(n => n !== undefined && n !== null);
+    // Ambil semua penilaian di semester yang dipilih
+    const penilaianDiSemester = penilaianPerSemester.value.filter(
+        p => p.semester_id === selectedSemester.value
+    );
+
+    console.log('Penilaian di semester', selectedSemester.value, ':', penilaianDiSemester.length);
+
+    // Filter mahasiswa berdasarkan filter yang dipilih
+    const filteredMahasiswaIds = students.value
+        .filter(s =>
+            s.fakultas_id === selectedFakultas.value &&
+            s.prodi_id === selectedProdi.value &&
+            s.angkatan_id === selectedAngkatan.value &&
+            (selectedKelas.value ? s.kelas_id === selectedKelas.value : true)
+        )
+        .map(s => s.id);
+
+    console.log('Filtered mahasiswa IDs:', filteredMahasiswaIds.length);
+
+    // Ambil nilai untuk kriteria tertentu
+    const nilaiSemua = penilaianDiSemester
+        .filter(p => filteredMahasiswaIds.includes(p.mahasiswa_id))
+        .map(p => p.nilai && p.nilai[kriteriaId])
+        .filter(n => n !== undefined && n !== null && !isNaN(n));
+
+    console.log('Nilai untuk kriteria', kriteriaId, ':', nilaiSemua.length);
 
     if (nilaiSemua.length === 0) return 0;
     const total = nilaiSemua.reduce((sum, n) => sum + parseFloat(n), 0);
     return (total / nilaiSemua.length).toFixed(2);
 };
 
-// ========== MAHASISWA TERURUT BERDASARKAN NILAI V ==========
-const sortedStudentsByV = computed(() => {
-    return [...students.value].sort((a, b) => (b.v || 0) - (a.v || 0));
+// ========== FILTER DATA MASTER ==========
+const filteredProdi = computed(() => {
+    return prodiList.value.filter(p => p.fakultas_id === selectedFakultas.value);
 });
 
-// ========== RANKING UNTUK TABEL DASHBOARD ==========
-const rankedStudents = computed(() => {
-    return [...students.value]
-        .filter(s => s.v !== undefined && s.v !== null)
-        .sort((a, b) => (parseFloat(b.v) || 0) - (parseFloat(a.v) || 0))
-        .slice(0, 5);
+const filteredStudentsByGroup = computed(() => {
+    let result = students.value.filter(s =>
+        s.fakultas_id === selectedFakultas.value &&
+        s.prodi_id === selectedProdi.value &&
+        s.angkatan_id === selectedAngkatan.value &&
+        (selectedKelas.value ? s.kelas_id === selectedKelas.value : true)
+    );
+
+    // Filter berdasarkan semester (hanya mahasiswa yang punya data nilai di semester ini)
+    result = result.filter(siswa => {
+        const hasData = penilaianPerSemester.value.some(
+            p => p.mahasiswa_id === siswa.id && p.semester_id === selectedSemester.value
+        );
+        return hasData;
+    });
+
+    console.log('Filtered students:', result.length);
+    return result;
 });
 
-// ========== COMPUTED PROPERTIES ==========
-const formattedTitle = computed(() => {
-    if (showStudentForm.value) return editingStudent.value ? 'Edit Data Siswa' : 'Tambah Data Siswa';
-    const titles = { 'dashboard': 'Dashboard', 'manajemen-kriteria': 'Manajemen Kriteria', 'data-siswa': 'Data Siswa', 'proses-perhitungan': 'SPK TOPSIS' };
-    return titles[activeTab.value] || activeTab.value;
+const filteredSortedStudents = computed(() => {
+    return [...filteredStudentsByGroup.value].sort((a, b) => (b.v || 0) - (a.v || 0));
+});
+
+const filteredRankedStudents = computed(() => {
+    return filteredSortedStudents.value.slice(0, 5);
 });
 
 const chartData = computed(() => {
-    if (rankedStudents.value.length === 0) return [{ name: 'N/A', value: 0 }];
-    return rankedStudents.value.slice(0, 7).map(s => ({
+    if (filteredRankedStudents.value.length === 0) return [{ name: 'N/A', value: 0 }];
+    return filteredRankedStudents.value.slice(0, 7).map(s => ({
         name: s.nama?.split(' ')[0] || s.nama || 'Unknown',
         value: parseFloat(s.v) || 0
     }));
 });
 
-// ========== STATS DENGAN FORMAT UNTUK STATSCARD ==========
 const stats = computed(() => {
-    const siswaDenganV = students.value.filter(s => s.v !== undefined && s.v !== null);
+    const siswaDenganV = filteredStudentsByGroup.value.filter(s => s.v !== undefined && s.v !== null);
     const avgV = siswaDenganV.length > 0
         ? (siswaDenganV.reduce((acc, s) => acc + (parseFloat(s.v) || 0), 0) / siswaDenganV.length).toFixed(2)
         : '0.00';
@@ -615,12 +847,12 @@ const stats = computed(() => {
     return [
         {
             title: 'Total Mahasiswa',
-            value: students.value.length,
+            value: filteredStudentsByGroup.value.length,
             icon: 'school',
             bgIcon: 'groups',
             color: 'blue',
-            badge: `${students.value.length} Orang`,
-            trend: `${students.value.length} Mahasiswa`,
+            badge: `${filteredStudentsByGroup.value.length} Orang`,
+            trend: `${filteredStudentsByGroup.value.length} Mahasiswa`,
             trendColor: 'up'
         },
         {
@@ -656,13 +888,112 @@ const stats = computed(() => {
     ];
 });
 
+const onFakultasChange = () => {
+    if (filteredProdi.value.length > 0) {
+        selectedProdi.value = filteredProdi.value[0].id;
+    }
+};
+
+// ========== FUNGSI LOAD HASIL PERHITUNGAN ==========
+const loadHasilPerhitunganByFilter = () => {
+    try {
+        const savedRiwayat = localStorage.getItem('topsis_riwayat_perhitungan');
+        if (!savedRiwayat) {
+            console.log('⚠️ Dashboard: Belum ada riwayat perhitungan');
+            return;
+        }
+
+        const riwayat = JSON.parse(savedRiwayat);
+        if (riwayat.length === 0) {
+            console.log('⚠️ Dashboard: Riwayat perhitungan kosong');
+            return;
+        }
+
+        const perhitunganYangSesuai = riwayat.find(r => {
+        let match = r.filter.fakultasId === selectedFakultas.value &&
+                    r.filter.prodiId === selectedProdi.value &&
+                    r.filter.angkatanId === selectedAngkatan.value &&
+                    r.filter.semesterId === selectedSemester.value;
+
+        if (match) {
+            if (selectedKelas.value) {
+            match = r.filter.kelasId === selectedKelas.value;
+            } else {
+            match = !r.filter.kelasId || r.filter.kelasId === null || r.filter.kelasId === '';
+            }
+        }
+
+        return match;
+        });
+
+
+        if (perhitunganYangSesuai && perhitunganYangSesuai.hasil) {
+            const updatedStudents = students.value.map(siswa => {
+                const hasil = perhitunganYangSesuai.hasil.find(h => h.id === siswa.id);
+                if (hasil) {
+                    return {
+                        ...siswa,
+                        v: hasil.preferensi || hasil.v || 0
+                    };
+                }
+                return { ...siswa, v: 0 };
+            });
+            students.value = updatedStudents;
+            localStorage.setItem('mahasiswa', JSON.stringify(students.value));
+            console.log('✅ Dashboard: Memuat hasil untuk filter',
+                perhitunganYangSesuai.filter.prodiNama,
+                '-', perhitunganYangSesuai.filter.semesterNama);
+        } else {
+            const resetStudents = students.value.map(siswa => ({
+                ...siswa,
+                v: 0
+            }));
+            students.value = resetStudents;
+            localStorage.setItem('mahasiswa', JSON.stringify(students.value));
+            console.log('⚠️ Dashboard: Belum ada perhitungan untuk filter yang dipilih');
+        }
+    } catch (e) {
+        console.error('Gagal memuat hasil perhitungan:', e);
+    }
+};
+
+// ========== LOAD DATA KELAS ==========
+const loadKelasData = () => {
+    if (!localStorage.getItem('kelas')) {
+        localStorage.setItem('kelas', JSON.stringify(defaultKelas));
+    }
+    kelasList.value = JSON.parse(localStorage.getItem('kelas') || '[]');
+};
+
+// ========== COMPUTED PROPERTIES ==========
+const formattedTitle = computed(() => {
+    if (showStudentForm.value) return editingStudent.value ? 'Edit Data Mahasiswa' : 'Tambah Data Mahasiswa';
+    const titles = {
+        'dashboard': 'Dashboard',
+        'manajemen-kriteria': 'Manajemen Kriteria',
+        'data-mahasiswa': 'Data Mahasiswa',
+        'proses-perhitungan': 'SPK TOPSIS',
+        'laporan': 'Laporan' };
+    return titles[activeTab.value] || activeTab.value;
+});
+
+// ========== WATCH UNTUK FILTER ==========
+watch([selectedFakultas, selectedProdi, selectedAngkatan, selectedSemester, selectedKelas], () => {
+    loadHasilPerhitunganByFilter();
+});
+
 // ========== LIFECYCLE ==========
 onMounted(() => {
+    // Load data kelas
+    loadKelasData();
+
+    // Load data mahasiswa
     const savedStudents = localStorage.getItem('mahasiswa');
     const savedCriteria = localStorage.getItem('kriteria');
 
     if (savedStudents) {
         students.value = JSON.parse(savedStudents);
+        console.log('✅ Loaded students:', students.value.length);
     }
 
     if (savedCriteria) {
@@ -672,14 +1003,120 @@ onMounted(() => {
         localStorage.setItem('kriteria', JSON.stringify(criteria.value));
     }
 
+    // LOAD ATAU MIGRASI DATA PENILAIAN PER SEMESTER
+    const savedPenilaian = localStorage.getItem('penilaian');
+    if (savedPenilaian) {
+        penilaianPerSemester.value = JSON.parse(savedPenilaian);
+        console.log('✅ Loaded penilaian:', penilaianPerSemester.value.length);
+    } else {
+        // Migrasi data lama
+        const newPenilaian = [];
+        students.value.forEach(siswa => {
+            if (siswa.nilai) {
+                newPenilaian.push({
+                    mahasiswa_id: siswa.id,
+                    semester_id: 4,
+                    nilai: siswa.nilai
+                });
+            }
+        });
+        penilaianPerSemester.value = newPenilaian;
+        localStorage.setItem('penilaian', JSON.stringify(penilaianPerSemester.value));
+        console.log('✅ Migrated penilaian:', penilaianPerSemester.value.length);
+    }
+
+    // Hapus properti 'nilai' dari students
+    const updatedStudents = students.value.map(s => {
+        const { nilai, ...rest } = s;
+        return rest;
+    });
+    students.value = updatedStudents;
+    localStorage.setItem('mahasiswa', JSON.stringify(students.value));
+
+    // DATA MASTER (FAKULTAS, PRODI, ANGKATAN, SEMESTER)
+    if (!localStorage.getItem('fakultas')) {
+        const defaultFakultas = [
+            { id: 1, nama: "Fakultas Agama Islam", kode: "FAI" },
+            { id: 2, nama: "Fakultas Ilmu Pendidikan", kode: "FIP" },
+            { id: 3, nama: "Fakultas Sains dan Teknologi", kode: "FST" }
+        ];
+        localStorage.setItem('fakultas', JSON.stringify(defaultFakultas));
+    }
+    fakultasList.value = JSON.parse(localStorage.getItem('fakultas') || '[]');
+
+    if (!localStorage.getItem('prodi')) {
+        const defaultProdi = [
+            { id: 1, nama: "Pendidikan Agama Islam", kode: "PAI", fakultas_id: 1 },
+            { id: 2, nama: "Pendidikan Guru Madrasah Ibtidaiyah", kode: "PGMI", fakultas_id: 1 },
+            { id: 3, nama: "Pendidikan Fisika", kode: "PF", fakultas_id: 2 },
+            { id: 4, nama: "Pendidikan Ekonomi", kode: "PE", fakultas_id: 2 },
+            { id: 5, nama: "Pendidikan Bahasa Inggris", kode: "PBI", fakultas_id: 2 },
+            { id: 6, nama: "Pendidikan Bahasa dan Sastra Indonesia", kode: "PBSI", fakultas_id: 2 },
+            { id: 7, nama: "Pendidikan Teknologi Informasi", kode: "PTI", fakultas_id: 2 },
+            { id: 8, nama: "Informatika", kode: "IF", fakultas_id: 3 },
+            { id: 9, nama: "Matematika", kode: "MTK", fakultas_id: 3 },
+            { id: 10, nama: "Sains Pertanian", kode: "SP", fakultas_id: 3 }
+        ];
+        localStorage.setItem('prodi', JSON.stringify(defaultProdi));
+    }
+    prodiList.value = JSON.parse(localStorage.getItem('prodi') || '[]');
+
+    if (!localStorage.getItem('angkatan')) {
+        const defaultAngkatan = [];
+        for (let tahun = 2020; tahun <= 2027; tahun++) {
+            defaultAngkatan.push({ id: tahun - 2019, tahun: tahun });
+        }
+        localStorage.setItem('angkatan', JSON.stringify(defaultAngkatan));
+    }
+    angkatanList.value = JSON.parse(localStorage.getItem('angkatan') || '[]');
+
+    if (!localStorage.getItem('semester')) {
+        const defaultSemester = [];
+        for (let i = 1; i <= 8; i++) {
+            defaultSemester.push({ id: i, nama: `Semester ${i}`, urutan: i });
+        }
+        localStorage.setItem('semester', JSON.stringify(defaultSemester));
+    }
+    semesterList.value = JSON.parse(localStorage.getItem('semester') || '[]');
+
+    // Update data mahasiswa lama dengan properti baru
+    let needUpdate = false;
+    const studentsWithProps = students.value.map(s => {
+        let updated = { ...s };
+        if (s.fakultas_id === undefined) {
+            needUpdate = true;
+            updated.fakultas_id = 3;
+            updated.prodi_id = 8;
+            updated.angkatan_id = 4;
+        }
+        if (s.kelas_id === undefined) {
+            needUpdate = true;
+            updated.kelas_id = 1; // Default ke Reguler - C01
+        }
+        return updated;
+    });
+    if (needUpdate) {
+        students.value = studentsWithProps;
+        localStorage.setItem('mahasiswa', JSON.stringify(students.value));
+    }
+
     generateDataPenilaian();
+
+    // LOAD HASIL PERHITUNGAN
+    generateDataPenilaian();
+    loadHasilPerhitunganByFilter();
+
+    console.log('Dashboard mounted - Students:', students.value.length);
+    console.log('Dashboard mounted - Criteria:', criteria.value.length);
+    console.log('Dashboard mounted - Penilaian:', penilaianPerSemester.value.length);
+    console.log('Dashboard mounted - Kelas:', kelasList.value.length);
 });
 
 // ========== MENU ITEMS ==========
 const menus = [
     { id: 'dashboard', title: 'Dashboard', icon: 'dashboard' },
     { id: 'manajemen-kriteria', title: 'Manajemen Kriteria', icon: 'list_alt' },
-    { id: 'data-siswa', title: 'Data Siswa', icon: 'groups' },
+    { id: 'data-mahasiswa', title: 'Data Mahasiswa', icon: 'groups' },
     { id: 'proses-perhitungan', title: 'Proses Perhitungan', icon: 'calculate' },
     { id: 'laporan', title: 'Laporan', icon: 'description' },
 ];
