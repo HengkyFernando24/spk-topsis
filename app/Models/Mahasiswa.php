@@ -10,4 +10,16 @@ class Mahasiswa extends Model
     protected $table = 'mahasiswa'; 
 
     protected $fillable = ['nama', 'nim', 'c1', 'c2', 'c3', 'c4', 'c5'];
+
+public function penilaian() {
+    return $this->hasMany(Penilaian::class);
+}
+
+public function hasilSPK() {
+    return $this->hasOne(HasilSPK::class); // Karena 1 mahasiswa mendapat 1 hasil SPK
+}
+
+
+
+
 }

@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('mahasiswa', function (Blueprint $table) {
             $table->id();
+             $table->string('nim')->nullable(); // Tambahkan ini agar tidak error!
             $table->string('nama');
             $table->float('c1'); // IPK
-            $table->string('nim')->nullable(); // Tambahkan ini agar tidak error!
             $table->integer('c2'); // Kehadiran
             $table->integer('c3'); // Prestasi
             $table->integer('c4'); // Terlambat

@@ -311,10 +311,19 @@
                   <span>Seluruh Data Mahasiswa</span>
                 </button>
                 <div class="border-t border-gray-100 my-1"></div>
+                
+                
+                
+                
                 <button @click="exportCompleteReport" class="w-full px-4 py-2.5 text-left text-sm hover:bg-emerald-50 transition-all duration-200 flex items-center gap-3 group">
                   <span class="material-icons text-emerald-500 text-sm">description</span>
                   <span>Laporan Lengkap (PDF)</span>
                 </button>
+
+
+
+
+
               </div>
             </div>
           </Transition>
@@ -339,7 +348,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import * as XLSX from 'xlsx';
-import html2pdf from 'html2pdf.js';
+import axios from 'axios'; // Import axios, hapus import html2pdf karena kita pakai backend
 
 // Props
 const props = defineProps({
@@ -378,7 +387,7 @@ const defaultKelas = [
   { id: 4, nama: "Karyawan - K01", kode: "K01", kelompok: "Karyawan" }
 ];
 
-// Cek apakah filter sudah lengkap (Fakultas, Prodi, Angkatan, Semester wajib, Kelas opsional)
+// Cek apakah filter sudah lengkap
 const isFilterComplete = computed(() => {
   return selectedFakultas.value !== '' &&
          selectedProdi.value !== '' &&
@@ -692,20 +701,67 @@ const exportReport = (type) => {
   XLSX.writeFile(wb, `Laporan_TOPSIS_${title}_${new Date().toISOString().split('T')[0]}.xlsx`);
 };
 
+// ==========================================
+// FUNGSI EXPORT PDF YANG SUDAH DIPERBAIKI
+// ==========================================
 const exportCompleteReport = async () => {
   dropdownOpen.value = false;
-  const element = document.getElementById('reportContainer');
-  if (!element) return;
+  console.log('Menyiapkan data untuk PDF...');
 
-  const opt = {
-    margin: [0.5, 0.5, 0.5, 0.5],
-    filename: `Laporan_TOPSIS_Complete_${new Date().toISOString().split('T')[0]}.pdf`,
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, logging: false },
-    jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
-  };
-  await html2pdf().set(opt).from(element).save();
+  // 1. Susun data persis seperti yang ada di layar UI Anda
+  const dataLaporan = sortedStudents.value.map((s, idx) => {
+    const baris = {
+      peringkat: idx + 1,
+      nim: s.nim || '-',
+      nama: s.nama || '-',
+      nilai_v: s.preferensi || s.v || 0,
+      nilai_kriteria: {}
+    };
+    
+    // Tarik nilai setiap kriteria untuk mahasiswa ini
+    props.dataKriteria.forEach(k => {
+      baris.nilai_kriteria[k.id] = getNilaiMahasiswa(s.id, k.id);
+    });
+    
+    return baris;
+  });
+
+  try {
+    // 2. Kirim via POST ke Laravel
+    const response = await axios({
+      url: '/topsis/laporan-lengkap',
+      method: 'POST',
+      data: {
+        mahasiswa: dataLaporan,
+        kriteria: props.dataKriteria
+      },
+      responseType: 'blob',
+    });
+
+    // 3. Proses unduhan file PDF
+    const blob = new Blob([response.data], { type: 'application/pdf' });
+    const fileURL = window.URL.createObjectURL(blob);
+    
+    const fileLink = document.createElement('a');
+    fileLink.href = fileURL;
+    fileLink.setAttribute('download', `Laporan_Lengkap_SPK_TOPSIS_${new Date().toISOString().split('T')[0]}.pdf`);
+    document.body.appendChild(fileLink);
+    
+    fileLink.click();
+    
+    document.body.removeChild(fileLink);
+    window.URL.revokeObjectURL(fileURL);
+  } catch (error) {
+    console.error('Terjadi kesalahan saat mengunduh PDF:', error);
+    alert('Gagal mengunduh laporan PDF. Cek console browser Anda.');
+  }
 };
+
+
+
+
+
+
 
 watch([selectedFakultas, selectedProdi, selectedAngkatan, selectedSemester, selectedKelas], () => {
   findMatchingData();

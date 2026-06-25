@@ -9,8 +9,14 @@ class Kriteria extends Model
 {
     use HasFactory;
 
-    // Tambahkan baris ini biar dia gak nyari 'kriterias'
-    protected $table = 'kriteria'; 
+    protected $table = 'kriteria'; // Tetap pertahankan ini
 
-    protected $fillable = ['kode', 'nama', 'bobot', 'tipe'];
+    // Sesuaikan nama kolom dengan class diagram
+    protected $fillable = ['kode_kriteria', 'nama_kriteria', 'jenis_atribut', 'bobot', 'tipe'];
+
+    // Tambahkan relasi ke tabel Penilaian
+    public function penilaian()
+    {
+        return $this->hasMany(Penilaian::class);
+    }
 }

@@ -1,58 +1,50 @@
 <template>
     <div class="auth-root">
-        <!-- Animated Background -->
-        <div class="bg-canvas">
-            <div class="orb orb-1"></div>
-            <div class="orb orb-2"></div>
-            <div class="orb orb-3"></div>
-            <div class="grid-overlay"></div>
-        </div>
 
-        <!-- Floating Decorative Shapes -->
-        <div class="shapes">
-            <div class="shape shape-hex"></div>
-            <div class="shape shape-ring"></div>
-            <div class="shape shape-dot-grid"></div>
+        <!-- Lightweight static background (no heavy animation) -->
+        <div class="bg-canvas">
+            <div class="bg-grid"></div>
+            <div class="bg-accent-1"></div>
+            <div class="bg-accent-2"></div>
         </div>
 
         <!-- Main Card -->
         <div class="auth-card" :class="{ 'card-shake': shaking }">
 
-            <!-- Left Panel — Brand -->
+            <!-- Left Panel -->
             <div class="brand-panel">
-                <div class="brand-glow"></div>
-
-                <div class="brand-top">
+                <div class="brand-inner">
                     <div class="brand-badge">
                         <span class="material-symbols-outlined">school</span>
                     </div>
                     <p class="brand-eyebrow">Sistem Penunjang Keputusan</p>
                     <h1 class="brand-title">SPK<span>TOPSIS</span></h1>
-                    <p class="brand-desc">Platform penunjang keputusan berbasis data dirancang untuk mendukung pengambilan keputusan institusi secara akurat dan efisien</p>
-                </div>
+                    <p class="brand-desc">Platform berbasis data untuk mendukung pengambilan keputusan institusi secara akurat dan efisien</p>
 
-                <div class="brand-stats">
-                    <div class="stat">
-                        <span class="material-symbols-outlined">groups</span>
-                        <div>
-                            <strong>2.400+</strong>
-                            <small>Siswa Aktif</small>
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <span class="material-symbols-outlined">groups</span>
+                            <span class="feature-label">Siswa Aktif</span>
                         </div>
-                    </div>
-                    <div class="stat-divider"></div>
-                    <div class="stat">
-                        <span class="material-symbols-outlined">menu_book</span>
-                        <div>
-                            <strong>180+</strong>
-                            <small>Mata Pelajaran</small>
+                        <div class="feature-card">
+                            <span class="material-symbols-outlined">menu_book</span>
+                            <span class="feature-label">Mata Pelajaran</span>
                         </div>
-                    </div>
-                    <div class="stat-divider"></div>
-                    <div class="stat">
-                        <span class="material-symbols-outlined">verified</span>
-                        <div>
-                            <strong>99.9%</strong>
-                            <small>Uptime</small>
+                        <div class="feature-card">
+                            <span class="material-symbols-outlined">bar_chart</span>
+                            <span class="feature-label">Analisis Data</span>
+                        </div>
+                        <div class="feature-card">
+                            <span class="material-symbols-outlined">verified</span>
+                            <span class="feature-label">Sistem Andal</span>
+                        </div>
+                        <div class="feature-card">
+                            <span class="material-symbols-outlined">leaderboard</span>
+                            <span class="feature-label">Peringkat TOPSIS</span>
+                        </div>
+                        <div class="feature-card">
+                            <span class="material-symbols-outlined">shield_lock</span>
+                            <span class="feature-label">Data Aman</span>
                         </div>
                     </div>
                 </div>
@@ -66,11 +58,13 @@
             <!-- Right Panel — Form -->
             <div class="form-panel">
                 <div class="form-header">
+                    <div class="form-logo-sm">
+                        <span class="material-symbols-outlined">school</span>
+                    </div>
                     <h2>Autentikasi Administrator</h2>
-                    <p>Silakan masukkan kredensial resmi Anda untuk mengakses sistem penunjang keputusan</p>
+                    <p>Masukkan kredensial resmi untuk mengakses sistem</p>
                 </div>
 
-                <!-- Error Alert -->
                 <transition name="slide-down">
                     <div v-if="errorMessage" class="error-alert">
                         <span class="material-symbols-outlined">error_outline</span>
@@ -78,16 +72,7 @@
                     </div>
                 </transition>
 
-                <!-- Success Alert -->
-                <transition name="slide-down">
-                    <div v-if="successMessage" class="success-alert">
-                        <span class="material-symbols-outlined">check_circle</span>
-                        <span>{{ successMessage }}</span>
-                    </div>
-                </transition>
-
                 <div class="form-body">
-                    <!-- Name Field -->
                     <div class="field-group" :class="{ focused: focusedField === 'name', filled: form.name }">
                         <label>Nama Administrator</label>
                         <div class="field-wrap">
@@ -97,14 +82,15 @@
                                 type="text"
                                 placeholder="Masukkan nama lengkap administrator"
                                 autofocus
+                                autocomplete="username"
                                 @focus="focusedField = 'name'"
                                 @blur="focusedField = ''"
+                                @keydown.enter="handleLogin"
                             />
                             <span v-if="form.name" class="field-check material-symbols-outlined">check_circle</span>
                         </div>
                     </div>
 
-                    <!-- Password Field -->
                     <div class="field-group" :class="{ focused: focusedField === 'password', filled: form.password }">
                         <label>Kata Sandi</label>
                         <div class="field-wrap">
@@ -113,8 +99,10 @@
                                 v-model="form.password"
                                 :type="showPassword ? 'text' : 'password'"
                                 placeholder="••••••••••••"
+                                autocomplete="current-password"
                                 @focus="focusedField = 'password'"
                                 @blur="focusedField = ''"
+                                @keydown.enter="handleLogin"
                             />
                             <button type="button" class="field-toggle" @click="showPassword = !showPassword">
                                 <span class="material-symbols-outlined">{{ showPassword ? 'visibility_off' : 'visibility' }}</span>
@@ -122,7 +110,6 @@
                         </div>
                     </div>
 
-                    <!-- Remember & Forgot -->
                     <div class="form-meta">
                         <label class="remember-label">
                             <input type="checkbox" v-model="form.remember" />
@@ -134,22 +121,28 @@
                         <a href="#" class="forgot-link">Pemulihan Kata Sandi</a>
                     </div>
 
-                    <!-- Submit -->
                     <button
                         type="button"
                         class="submit-btn"
-                        :class="{ loading: isLoading }"
-                        :disabled="isLoading || !form.name || !form.password"
+                        :disabled="!form.name || !form.password || isLoading"
                         @click="handleLogin"
                     >
+                        <span v-if="!isLoading" class="material-symbols-outlined">login</span>
+                        <span v-if="!isLoading">Masuk ke Sistem</span>
+
+                        <!-- Loading state -->
                         <span v-if="isLoading" class="btn-spinner material-symbols-outlined">progress_activity</span>
-                        <span v-else class="material-symbols-outlined">login</span>
-                        {{ isLoading ? 'Memverifikasi Identitas...' : 'Masuk ke Sistem' }}
+                        <span v-if="isLoading">Memverifikasi...</span>
+
                         <span v-if="!isLoading" class="btn-arrow material-symbols-outlined">arrow_forward</span>
                     </button>
+
+                    <p class="enter-hint">
+                        <span class="material-symbols-outlined">keyboard_return</span>
+                        Tekan <kbd>Enter</kbd> untuk masuk
+                    </p>
                 </div>
 
-                <!-- Footer -->
                 <div class="form-footer">
                     <span class="material-symbols-outlined">corporate_fare</span>
                     &copy; {{ new Date().getFullYear() }} SPK TOPSIS. Seluruh hak cipta dilindungi undang-undang.
@@ -160,52 +153,82 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import axios from 'axios';
 
-const form = ref({ name: '', password: '', remember: false });
-const isLoading    = ref(false);
+const form        = ref({ name: '', password: '', remember: false });
 const errorMessage = ref('');
-const successMessage = ref('');
 const showPassword = ref(false);
 const focusedField = ref('');
 const shaking      = ref(false);
+const isLoading    = ref(false);
+
+// Cache CSRF token so we don't re-fetch it on every login attempt
+let csrfReady = false;
+
+const primeCsrf = async () => {
+    if (csrfReady) return;
+    try {
+        await axios.get('/sanctum/csrf-cookie');
+        csrfReady = true;
+    } catch {
+        // Will retry on actual login attempt
+    }
+};
+
+// Kick off CSRF fetch immediately on page load (background, non-blocking)
+primeCsrf();
 
 const triggerShake = () => {
     shaking.value = true;
-    setTimeout(() => (shaking.value = false), 600);
+    setTimeout(() => (shaking.value = false), 550);
 };
 
 const handleLogin = async () => {
-    if (!form.value.name || !form.value.password) return;
-    isLoading.value    = true;
+    if (!form.value.name || !form.value.password || isLoading.value) return;
+
     errorMessage.value = '';
-    successMessage.value = '';
+    isLoading.value    = true;
 
     try {
-        await axios.get('/sanctum/csrf-cookie');
-        await axios.post('/login', form.value);
-        successMessage.value = 'Autentikasi berhasil. Anda akan segera diarahkan ke dasbor utama.';
-        setTimeout(() => (window.location.href = '/dashboard'), 1200);
+        // CSRF already fetched in background; only await if somehow missed
+        if (!csrfReady) {
+            await axios.get('/sanctum/csrf-cookie');
+            csrfReady = true;
+        }
+
+        await axios.post('/login', {
+            name:     form.value.name,
+            password: form.value.password,
+            remember: form.value.remember,
+        });
+
+        // Instant redirect — no extra await
+        window.location.replace('/dashboard');
+
     } catch (error) {
+        isLoading.value = false;
+
         if (error.response?.status === 422 || error.response?.status === 401) {
-            errorMessage.value = 'Kredensial yang Anda masukkan tidak valid. Mohon periksa kembali nama dan kata sandi Anda.';
+            errorMessage.value = 'Kredensial tidak valid. Periksa kembali nama dan kata sandi Anda.';
         } else {
-            errorMessage.value = 'Terjadi gangguan pada server. Silakan hubungi tim teknis atau coba kembali beberapa saat lagi.';
+            errorMessage.value = 'Gangguan pada server. Silakan coba beberapa saat lagi.';
         }
         triggerShake();
-    } finally {
-        isLoading.value = false;
     }
 };
 </script>
 
 <style scoped>
-/* ── Google Fonts ── */
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
 
-/* ── Reset & Root ── */
+/* ── PALETTE
+   Primary dark green  : #1a6b3c
+   Mid green           : #21854a
+   Light green         : #2a9d5c
+   Tint bg             : #f2f9f5
+──────────────────── */
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 .auth-root {
@@ -213,14 +236,17 @@ const handleLogin = async () => {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #08090d;
-    font-family: 'arial', arial;
+    background: #f2f9f5;
+    font-family: Arial, sans-serif;
     position: relative;
     overflow: hidden;
     padding: 1.5rem;
 }
 
-/* ── Animated Background ── */
+/* ════════════════════════════════
+   LIGHTWEIGHT STATIC BACKGROUND
+   — replaced heavy CSS animations
+════════════════════════════════ */
 .bg-canvas {
     position: fixed;
     inset: 0;
@@ -228,492 +254,461 @@ const handleLogin = async () => {
     z-index: 0;
 }
 
-.orb {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(100px);
-    opacity: 0.45;
-    animation: drift 12s ease-in-out infinite alternate;
-}
-.orb-1 {
-    width: 520px; height: 520px;
-    background: radial-gradient(circle, #059669, transparent 70%);
-    top: -160px; left: -120px;
-    animation-duration: 14s;
-}
-.orb-2 {
-    width: 420px; height: 420px;
-    background: radial-gradient(circle, #0ea5e9, transparent 70%);
-    bottom: -140px; right: -100px;
-    animation-duration: 18s;
-    animation-delay: -6s;
-}
-.orb-3 {
-    width: 300px; height: 300px;
-    background: radial-gradient(circle, #7c3aed, transparent 70%);
-    top: 40%; left: 50%;
-    opacity: 0.2;
-    animation-duration: 20s;
-    animation-delay: -10s;
-}
-@keyframes drift {
-    from { transform: translate(0, 0) scale(1); }
-    to   { transform: translate(40px, 30px) scale(1.08); }
-}
-
-.grid-overlay {
+/* Subtle grid — static, zero GPU cost */
+.bg-grid {
     position: absolute;
     inset: 0;
     background-image:
-        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
-    background-size: 60px 60px;
+        linear-gradient(rgba(26,107,60,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(26,107,60,0.06) 1px, transparent 1px);
+    background-size: 64px 64px;
 }
 
-/* ── Decorative Shapes ── */
-.shapes { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
-
-.shape-hex {
+/* Two static radial accents — replaces all blob/wave/sweep/diamond animations */
+.bg-accent-1 {
     position: absolute;
-    top: 8%; right: 8%;
-    width: 120px; height: 140px;
-    background: conic-gradient(from 0deg, #059669 0%, transparent 60%);
-    clip-path: polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
-    opacity: 0.12;
-    animation: spin-slow 30s linear infinite;
-}
-.shape-ring {
-    position: absolute;
-    bottom: 12%; left: 5%;
-    width: 140px; height: 140px;
+    top: -120px;
+    left: -120px;
+    width: 480px;
+    height: 400px;
+    background: radial-gradient(ellipse, rgba(26,107,60,0.12) 0%, transparent 70%);
     border-radius: 50%;
-    border: 2px solid rgba(14,165,233,0.2);
-    box-shadow: 0 0 40px rgba(14,165,233,0.1);
-    animation: pulse-ring 4s ease-in-out infinite;
 }
-.shape-dot-grid {
+.bg-accent-2 {
     position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: 300px; height: 300px;
-    background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
-    background-size: 20px 20px;
-    opacity: 0.5;
+    bottom: -100px;
+    right: -80px;
+    width: 400px;
+    height: 360px;
+    background: radial-gradient(ellipse, rgba(33,133,74,0.08) 0%, transparent 70%);
+    border-radius: 50%;
 }
 
-@keyframes spin-slow { to { transform: rotate(360deg); } }
-@keyframes pulse-ring {
-    0%, 100% { transform: scale(1); opacity: 0.5; }
-    50%       { transform: scale(1.1); opacity: 1; }
-}
-
-/* ── Card ── */
+/* ════════════════════════════════
+   CARD
+════════════════════════════════ */
 .auth-card {
     position: relative;
     z-index: 10;
     display: flex;
     width: 100%;
-    max-width: 900px;
+    max-width: 920px;
     min-height: 560px;
-    border-radius: 28px;
+    border-radius: 24px;
     overflow: hidden;
     box-shadow:
-        0 0 0 1px rgba(255,255,255,0.06),
-        0 40px 80px rgba(0,0,0,0.6),
-        0 0 60px rgba(5,150,105,0.08);
-    animation: card-in 0.7s cubic-bezier(0.16,1,0.3,1) both;
+        0 0 0 1px rgba(26,107,60,0.1),
+        0 24px 64px rgba(26,107,60,0.14),
+        0 4px 16px rgba(0,0,0,0.05);
+    /* Simplified entry — no scale to avoid reflow */
+    animation: cardIn 0.4s ease both;
 }
-
-@keyframes card-in {
-    from { opacity: 0; transform: translateY(32px) scale(0.97); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
+@keyframes cardIn {
+    from { opacity:0; transform:translateY(16px); }
+    to   { opacity:1; transform:translateY(0); }
 }
-
 .card-shake {
-    animation: shake 0.55s cubic-bezier(.36,.07,.19,.97) both !important;
+    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both !important;
 }
 @keyframes shake {
-    10%,90%  { transform: translateX(-3px); }
-    20%,80%  { transform: translateX(5px); }
-    30%,50%,70% { transform: translateX(-6px); }
-    40%,60%  { transform: translateX(6px); }
+    10%,90%     { transform: translateX(-3px); }
+    20%,80%     { transform: translateX( 5px); }
+    30%,50%,70% { transform: translateX(-5px); }
+    40%,60%     { transform: translateX( 5px); }
 }
 
-/* ── Brand Panel (Left) ── */
+/* ════════════════════════════════
+   BRAND PANEL (Left)
+════════════════════════════════ */
 .brand-panel {
     flex: 0 0 340px;
-    background:
-        linear-gradient(150deg, #0a1a14 0%, #051208 60%, #071118 100%);
+    background: linear-gradient(148deg, #0e4d2a 0%, #1a6b3c 55%, #21854a 100%);
     padding: 2.5rem 2rem;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     position: relative;
-    border-right: 1px solid rgba(255,255,255,0.04);
     overflow: hidden;
 }
-
-.brand-glow {
+.brand-panel::before {
+    content: '';
     position: absolute;
     top: -60px; left: -60px;
     width: 260px; height: 260px;
-    background: radial-gradient(circle, rgba(5,150,105,0.3), transparent 70%);
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.07) 0%, transparent 70%);
+    pointer-events: none;
+}
+.brand-panel::after {
+    content: '';
+    position: absolute;
+    bottom: -100px; right: -100px;
+    width: 280px; height: 280px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,0.08);
     pointer-events: none;
 }
 
+.brand-inner { position: relative; z-index: 1; }
+
 .brand-badge {
-    width: 60px; height: 60px;
-    background: linear-gradient(135deg, #059669, #034d33);
-    border-radius: 18px;
+    width: 56px; height: 56px;
+    background: rgba(255,255,255,0.12);
+    border: 1.5px solid rgba(255,255,255,0.22);
+    border-radius: 16px;
     display: flex; align-items: center; justify-content: center;
-    margin-bottom: 1.25rem;
-    box-shadow: 0 8px 24px rgba(5,150,105,0.4);
-    border: 1px solid rgba(5,150,105,0.5);
+    margin-bottom: 1.2rem;
 }
-.brand-badge .material-symbols-outlined {
-    font-size: 30px;
-    color: #fff;
-}
+.brand-badge .material-symbols-outlined { font-size: 26px; color: #fff; }
 
 .brand-eyebrow {
-    font-family: 'arial', sans-serif;
-    font-size: 0.65rem;
-    font-weight: 600;
-    letter-spacing: 0.25em;
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: #34d399;
-    margin-bottom: 0.4rem;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 0.3rem;
 }
 
 .brand-title {
-    font-family: 'arial', sans-serif;
-    font-size: 2.1rem;
+    font-size: 2.15rem;
     font-weight: 800;
-    color: #f0fdf4;
-    line-height: 1.1;
-    margin-bottom: 1rem;
+    color: #fff;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.9rem;
 }
-.brand-title span { color: #34d399; }
+.brand-title span { color: #86efac; }
 
 .brand-desc {
-    font-size: 0.82rem;
-    color: rgba(255,255,255,0.4);
-    line-height: 1.65;
+    font-size: 0.79rem;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.7;
     font-weight: 300;
+    margin-bottom: 1.75rem;
 }
 
-/* Stats */
-.brand-stats {
-    display: flex;
-    gap: 0.75rem;
-    align-items: center;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.05);
-    border-radius: 16px;
-    padding: 1rem 0.75rem;
-    margin-top: 2rem;
+/* Feature grid — simplified, no per-card animations */
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.55rem;
 }
-.stat {
-    flex: 1;
+.feature-card {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.35rem;
+    gap: 0.4rem;
+    padding: 0.8rem 0.3rem 0.7rem;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 14px;
+    cursor: default;
+    transition: background 0.2s, border-color 0.2s;
+}
+.feature-card .material-symbols-outlined {
+    font-size: 20px;
+    color: rgba(255,255,255,0.7);
+    transition: color 0.2s;
+}
+.feature-card:hover {
+    background: rgba(255,255,255,0.13);
+    border-color: rgba(134,239,172,0.4);
+}
+.feature-card:hover .material-symbols-outlined { color: #86efac; }
+.feature-label {
+    font-size: 0.57rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: rgba(255,255,255,0.45);
     text-align: center;
-}
-.stat .material-symbols-outlined {
-    font-size: 18px;
-    color: #34d399;
-}
-.stat strong {
-    display: block;
-    font-family: 'arial', sans-serif;
-    font-size: 0.9rem;
-    font-weight: 800;
-    color: #f0fdf4;
-}
-.stat small {
-    font-size: 0.6rem;
-    color: rgba(255,255,255,0.35);
-    font-weight: 400;
-    white-space: nowrap;
-}
-.stat-divider {
-    width: 1px;
-    height: 36px;
-    background: rgba(255,255,255,0.07);
-    flex-shrink: 0;
+    line-height: 1.3;
 }
 
-/* Brand Footer */
 .brand-footer {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    margin-top: 1.5rem;
-    font-size: 0.7rem;
-    color: rgba(255,255,255,0.3);
-    font-weight: 500;
+    gap: 0.45rem;
+    font-size: 0.67rem;
+    color: rgba(255,255,255,0.38);
+    font-weight: 400;
+    position: relative;
+    z-index: 1;
 }
-.brand-footer .material-symbols-outlined {
-    font-size: 14px;
-    color: #34d399;
-    opacity: 0.7;
-}
+.brand-footer .material-symbols-outlined { font-size: 13px; color: #86efac; }
 
-/* ── Form Panel (Right) ── */
+/* ════════════════════════════════
+   FORM PANEL (Right)
+════════════════════════════════ */
 .form-panel {
     flex: 1;
-    background: #0f1117;
+    background: #ffffff;
     padding: 2.5rem 2.75rem;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
 }
 
-.form-header {
-    margin-bottom: 1.75rem;
+.form-header { margin-bottom: 1.6rem; }
+.form-logo-sm {
+    display: none;
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, #1a6b3c, #0e4d2a);
+    border-radius: 12px;
+    align-items: center; justify-content: center;
+    margin-bottom: 1rem;
 }
+.form-logo-sm .material-symbols-outlined { font-size: 22px; color: #fff; }
+
 .form-header h2 {
-    font-family: 'arial', sans-serif;
-    font-size: 1.75rem;
+    font-size: 1.55rem;
     font-weight: 800;
-    color: #f8fafc;
-    margin-bottom: 0.35rem;
+    color: #0e4d2a;
+    margin-bottom: 0.28rem;
+    letter-spacing: -0.02em;
 }
 .form-header p {
-    font-size: 0.82rem;
-    color: rgba(255,255,255,0.4);
-    font-weight: 300;
+    font-size: 0.81rem;
+    color: #6b7280;
 }
 
 /* Alerts */
-.error-alert, .success-alert {
+.error-alert {
     display: flex;
     align-items: center;
     gap: 0.6rem;
-    padding: 0.75rem 1rem;
+    padding: 0.72rem 1rem;
     border-radius: 12px;
-    font-size: 0.78rem;
+    font-size: 0.77rem;
     font-weight: 500;
-    margin-bottom: 1.25rem;
+    margin-bottom: 1.1rem;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
 }
-.error-alert {
-    background: rgba(239,68,68,0.1);
-    border: 1px solid rgba(239,68,68,0.25);
-    color: #fca5a5;
-}
-.success-alert {
-    background: rgba(5,150,105,0.12);
-    border: 1px solid rgba(5,150,105,0.3);
-    color: #6ee7b7;
-}
-.error-alert .material-symbols-outlined,
-.success-alert .material-symbols-outlined { font-size: 18px; flex-shrink: 0; }
+.error-alert .material-symbols-outlined { font-size: 17px; flex-shrink: 0; }
 
-.slide-down-enter-active { transition: all 0.3s cubic-bezier(0.16,1,0.3,1); }
-.slide-down-leave-active  { transition: all 0.2s ease-in; }
-.slide-down-enter-from    { opacity: 0; transform: translateY(-8px); }
-.slide-down-leave-to      { opacity: 0; transform: translateY(-4px); }
+.slide-down-enter-active { transition: all 0.25s ease; }
+.slide-down-leave-active  { transition: all 0.15s ease; }
+.slide-down-enter-from    { opacity:0; transform:translateY(-6px); }
+.slide-down-leave-to      { opacity:0; }
 
-/* ── Field Group ── */
-.form-body { display: flex; flex-direction: column; gap: 1.1rem; }
+/* Fields */
+.form-body { display: flex; flex-direction: column; gap: 1rem; }
 
-.field-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-}
+.field-group { display: flex; flex-direction: column; gap: 0.32rem; }
 .field-group label {
-    font-size: 0.68rem;
-    font-weight: 600;
-    letter-spacing: 0.12em;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.35);
+    color: #9ca3af;
     padding-left: 2px;
-    transition: color 0.2s;
+    transition: color 0.15s;
 }
-.field-group.focused label { color: #34d399; }
+.field-group.focused label { color: #1a6b3c; }
+.field-group.filled  label { color: #0e4d2a; }
 
-.field-wrap {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
+.field-wrap { position: relative; display: flex; align-items: center; }
 
 .field-icon {
     position: absolute;
-    left: 14px;
+    left: 13px;
     font-size: 18px !important;
-    color: rgba(255,255,255,0.2);
-    transition: color 0.2s;
+    color: #d1d5db;
     pointer-events: none;
+    transition: color 0.15s;
 }
-.field-group.focused .field-icon { color: #34d399; }
+.field-group.focused .field-icon,
+.field-group.filled  .field-icon { color: #1a6b3c; }
 
 .field-wrap input {
     width: 100%;
-    background: rgba(255,255,255,0.04);
-    border: 1.5px solid rgba(255,255,255,0.06);
+    background: #f9fafb;
+    border: 1.5px solid #e5e7eb;
     border-radius: 12px;
-    padding: 0.85rem 2.8rem 0.85rem 3rem;
-    font-family: 'arial', sans-serif;
-    font-size: 0.88rem;
-    font-weight: 400;
-    color: #f1f5f9;
+    padding: 0.84rem 2.8rem 0.84rem 2.9rem;
+    font-family: Arial, sans-serif;
+    font-size: 0.875rem;
+    color: #111827;
     outline: none;
-    transition: all 0.2s;
-    letter-spacing: 0.01em;
+    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
 }
-.field-wrap input::placeholder { color: rgba(255,255,255,0.18); }
+.field-wrap input::placeholder { color: #c4c9d1; }
 .field-wrap input:focus {
-    background: rgba(5,150,105,0.06);
-    border-color: #059669;
-    box-shadow: 0 0 0 3px rgba(5,150,105,0.12);
+    background: #fff;
+    border-color: #1a6b3c;
+    box-shadow: 0 0 0 3px rgba(26,107,60,0.1);
+}
+.field-group.filled .field-wrap input {
+    background: #fff;
+    border-color: #86efac;
 }
 
 .field-check {
     position: absolute;
-    right: 14px;
+    right: 13px;
     font-size: 16px !important;
-    color: #34d399;
+    color: #1a6b3c;
 }
 .field-toggle {
     position: absolute;
-    right: 12px;
+    right: 11px;
     background: none;
     border: none;
     cursor: pointer;
-    color: rgba(255,255,255,0.25);
+    color: #c4c9d1;
     display: flex;
     align-items: center;
     padding: 4px;
-    transition: color 0.2s;
     border-radius: 6px;
+    transition: color 0.15s;
 }
-.field-toggle:hover { color: #34d399; }
-.field-toggle .material-symbols-outlined { font-size: 18px !important; }
+.field-toggle:hover { color: #1a6b3c; }
+.field-toggle .material-symbols-outlined { font-size: 17px !important; }
 
-/* ── Meta Row ── */
+/* Meta */
 .form-meta {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-top: 0.25rem;
+    margin-top: 0.05rem;
 }
-
 .remember-label {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     cursor: pointer;
-    font-size: 0.78rem;
-    color: rgba(255,255,255,0.45);
-    font-weight: 400;
+    font-size: 0.77rem;
+    color: #6b7280;
     user-select: none;
 }
 .remember-label input[type="checkbox"] { display: none; }
-
 .checkbox-custom {
-    width: 18px; height: 18px;
+    width: 17px; height: 17px;
     border-radius: 5px;
-    border: 1.5px solid rgba(255,255,255,0.15);
-    background: rgba(255,255,255,0.04);
+    border: 1.5px solid #d1d5db;
+    background: #fff;
     display: flex; align-items: center; justify-content: center;
-    transition: all 0.2s;
+    transition: all 0.15s;
     flex-shrink: 0;
 }
-.remember-label input:checked ~ .checkbox-custom,
 .remember-label:has(input:checked) .checkbox-custom {
-    background: #059669;
-    border-color: #059669;
+    background: #1a6b3c;
+    border-color: #1a6b3c;
 }
-.checkbox-custom .material-symbols-outlined { font-size: 12px !important; color: #fff; }
+.checkbox-custom .material-symbols-outlined { font-size: 11px !important; color: #fff; }
 
 .forgot-link {
-    font-size: 0.75rem;
+    font-size: 0.74rem;
     font-weight: 600;
-    color: #34d399;
+    color: #1a6b3c;
     text-decoration: none;
-    transition: color 0.2s;
+    transition: color 0.15s;
 }
-.forgot-link:hover { color: #6ee7b7; }
+.forgot-link:hover { color: #0e4d2a; text-decoration: underline; }
 
-/* ── Submit Button ── */
+/* Submit */
 .submit-btn {
     width: 100%;
-    margin-top: 0.5rem;
-    padding: 1rem 1.5rem;
-    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    margin-top: 0.2rem;
+    padding: 0.93rem 1.5rem;
+    background: linear-gradient(135deg, #21854a 0%, #1a6b3c 50%, #0e4d2a 100%);
     color: #fff;
     border: none;
-    border-radius: 14px;
-    font-family: 'arial', sans-serif;
-    font-size: 0.82rem;
+    border-radius: 12px;
+    font-family: Arial, sans-serif;
+    font-size: 0.81rem;
     font-weight: 700;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.07em;
     text-transform: uppercase;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.6rem;
-    transition: all 0.25s;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 8px 24px rgba(5,150,105,0.35);
+    gap: 0.55rem;
+    transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+    box-shadow: 0 4px 16px rgba(26,107,60,0.32);
 }
-.submit-btn::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(255,255,255,0.08), transparent);
-    opacity: 0;
-    transition: opacity 0.2s;
-}
-.submit-btn:hover:not(:disabled)::before { opacity: 1; }
 .submit-btn:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 14px 32px rgba(5,150,105,0.45);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(26,107,60,0.4);
 }
-.submit-btn:active:not(:disabled) { transform: translateY(0); }
+.submit-btn:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(26,107,60,0.25);
+}
 .submit-btn:disabled {
-    opacity: 0.45;
+    opacity: 0.42;
     cursor: not-allowed;
     box-shadow: none;
 }
-.submit-btn .material-symbols-outlined { font-size: 18px !important; }
+.submit-btn .material-symbols-outlined { font-size: 17px !important; }
 
-.btn-spinner { animation: spin 0.8s linear infinite; }
+/* Spinner — single CSS animation, very lightweight */
+.btn-spinner {
+    animation: spin 0.7s linear infinite;
+    font-size: 17px !important;
+}
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .btn-arrow {
     margin-left: auto;
     opacity: 0.6;
-    transition: transform 0.2s, opacity 0.2s;
+    transition: transform 0.15s, opacity 0.15s;
 }
 .submit-btn:hover:not(:disabled) .btn-arrow {
-    transform: translateX(4px);
+    transform: translateX(3px);
     opacity: 1;
 }
 
-/* ── Form Footer ── */
+/* Enter hint */
+.enter-hint {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    font-size: 0.69rem;
+    color: #9ca3af;
+    margin-top: 0.08rem;
+}
+.enter-hint .material-symbols-outlined { font-size: 12px !important; color: #21854a; }
+.enter-hint kbd {
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 6px;
+    border-radius: 5px;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    font-family: Arial, sans-serif;
+    font-size: 0.67rem;
+    font-weight: 600;
+    color: #4b5563;
+}
+
+/* Footer */
 .form-footer {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.4rem;
-    font-size: 0.68rem;
-    color: rgba(255,255,255,0.2);
-    margin-top: 1.5rem;
-    font-weight: 300;
+    font-size: 0.66rem;
+    color: #9ca3af;
+    margin-top: 1.4rem;
 }
-.form-footer .material-symbols-outlined { font-size: 14px !important; }
+.form-footer .material-symbols-outlined { font-size: 12px !important; }
 
-/* ── Responsive ── */
-@media (max-width: 700px) {
-    .brand-panel { display: none; }
-    .auth-card { border-radius: 20px; }
-    .form-panel { padding: 2rem 1.5rem; }
+/* Responsive */
+@media (max-width: 720px) {
+    .brand-panel  { display: none; }
+    .auth-card    { border-radius: 20px; }
+    .form-panel   { padding: 2rem 1.5rem; }
+    .form-logo-sm { display: flex; }
+}
+
+/* Respect user's reduced-motion preference */
+@media (prefers-reduced-motion: reduce) {
+    .auth-card    { animation: none; }
+    .btn-spinner  { animation: none; }
 }
 </style>

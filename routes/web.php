@@ -27,3 +27,7 @@ Route::get('/login', function () {
 // 6. PROSES Login & Logout
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout']);
+
+
+
+Route::post('/topsis/laporan-lengkap', [TopsisController::class, 'generateLaporan']);

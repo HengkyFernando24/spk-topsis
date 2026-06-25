@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Mahasiswa;
 use App\Models\Kriteria;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class TopsisController extends Controller
 {
@@ -179,4 +180,25 @@ class TopsisController extends Controller
 
         return response()->json($students);
     }
+public function generateLaporan(Request $request)
+{
+    // Tangkap data array yang dikirim dari Vue Frontend
+    $mahasiswa = $request->input('mahasiswa', []);
+    $kriteria = $request->input('kriteria', []);
+
+    $data = [
+        'title' => 'LAPORAN LENGKAP HASIL SELEKSI SPK TOPSIS',
+        'date' => date('d M Y'),
+        'mahasiswa' => $mahasiswa,
+        'kriteria' => $kriteria
+    ];
+
+    $pdf = Pdf::loadView('pdf.laporan', $data);
+    
+    return $pdf->download('Laporan_Lengkap_SPK_TOPSIS.pdf');
+}
+
+
+
+
 }

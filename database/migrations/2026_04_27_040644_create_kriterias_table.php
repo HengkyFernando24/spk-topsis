@@ -13,8 +13,8 @@ public function up()
 {
     Schema::create('kriteria', function (Blueprint $table) {
         $table->id();
-        $table->string('kode'); // Contoh: C1, C2
-        $table->string('nama'); // Contoh: IPK, Kehadiran
+        $table->string('kode_kriteria'); // Contoh: C1, C2
+        $table->string('nama_kriteria'); // Contoh: IPK, Kehadiran
         $table->double('bobot'); // Contoh: 0.25
         $table->enum('tipe', ['benefit', 'cost']); // Tipe kriteria
         $table->timestamps();
